@@ -4,6 +4,7 @@ import { ArrowLeft, Loader as Loader2, ShoppingCart, CircleAlert as AlertCircle,
 import { useCart } from '../lib/cart';
 import { useStore } from '../lib/store';
 import { useToast } from '../lib/toast';
+import { useT } from '../lib/i18n';
 import { computeExtrasPrice } from '../lib/pricing';
 import { getCheckoutIdentifiers, createCheckout } from '../lib/api';
 import { isNiveauHidden, isNiveauField } from '../lib/utils';
@@ -26,6 +27,7 @@ export default function CheckoutPage() {
   const { items, removeItem, updateQuantity, clearCart } = useCart();
   const { store } = useStore();
   const { addToast } = useToast();
+  const t = useT();
   const [requiredIdentifiers, setRequiredIdentifiers] = useState<string[]>([]);
   const [identifierValues, setIdentifierValues] = useState<Record<string, string>>({});
   const [loadingInit, setLoadingInit] = useState(true);
@@ -65,19 +67,19 @@ export default function CheckoutPage() {
 
   const handleCheckout = useCallback(async () => {
     if (!acceptedTerms) {
-      addToast('Veuillez accepter les conditions relatives au droit de rétractation.', 'warning');
+      addToast(t('checkout.toast.accept_terms'), 'warning');
       return;
     }
 
     if (!store?.id) {
-      addToast('Impossible de contacter la boutique. Veuillez réessayer.', 'error');
+      addToast(t('checkout.toast.shop_unavailable'), 'error');
       return;
     }
 
     for (const id of requiredIdentifiers) {
       if (!identifierValues[id]?.trim()) {
         const label = IDENTIFIER_LABELS[id]?.label || id;
-        addToast(`Le champ "${label}" est requis.`, 'warning');
+        addToast(t('checkout.toast.field_required', { label }), 'warning');
         return;
       }
     }
@@ -112,14 +114,14 @@ export default function CheckoutPage() {
         const isExact = rule.min === rule.max;
         if (isExact && total !== rule.max) {
           addToast(
-            `${item.product.name} - ${rule.name} : la somme doit etre exactement ${rule.max} (actuellement ${total}).`,
+            t('checkout.toast.rule_exact', { product: item.product.name, rule: rule.name, max: rule.max, total }),
             'warning'
           );
           return;
         }
         if (!isExact && (total < rule.min || total > rule.max)) {
           addToast(
-            `${item.product.name} - ${rule.name} : la somme doit etre entre ${rule.min} et ${rule.max} (actuellement ${total}).`,
+            t('checkout.toast.rule_range', { product: item.product.name, rule: rule.name, min: rule.min, max: rule.max, total }),
             'warning'
           );
           return;
@@ -220,7 +222,7 @@ export default function CheckoutPage() {
     } catch (err) {
       const msg = err instanceof Error
         ? err.message.split('\n\nDEBUG_PAYLOAD:')[0]
-        : 'Une erreur est survenue. Veuillez réessayer.';
+        : t('checkout.toast.generic_error');
       setError(err instanceof Error ? err.message : msg);
       addToast(msg, 'error', 5000);
       setLoadingCheckout(false);
@@ -234,22 +236,22 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 rounded-full bg-ark-600/15 flex items-center justify-center mx-auto mb-6 animate-pulse">
             <Lock className="w-10 h-10 text-ark-500" />
           </div>
-          <h1 className="text-2xl font-bold text-heading mb-3">Redirection vers le paiement</h1>
+          <h1 className="text-2xl font-bold text-heading mb-3">{t('checkout.redirecting.title')}</h1>
           <p className="text-volcanic-400 mb-6">
-            Vous allez etre redirige vers la page de paiement securisee. Veuillez patienter...
+            {t('checkout.redirecting.body')}
           </p>
           <div className="flex items-center justify-center gap-2 text-ark-500">
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm font-medium">Redirection en cours...</span>
+            <span className="text-sm font-medium">{t('checkout.redirecting.status')}</span>
           </div>
           <div className="mt-8 flex items-center justify-center gap-4 text-xs text-volcanic-500">
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-ark-600" />
-              <span>Paiement securise</span>
+              <span>{t('checkout.trust.secure_payment')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-ark-600" />
-              <span>Livraison instantanee</span>
+              <span>{t('checkout.trust.instant_delivery')}</span>
             </div>
           </div>
         </div>
@@ -264,16 +266,16 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 rounded-full bg-volcanic-800/60 flex items-center justify-center mx-auto mb-6">
             <ShoppingBag className="w-10 h-10 text-volcanic-600" />
           </div>
-          <h1 className="text-2xl font-bold text-heading mb-3">Votre panier est vide</h1>
+          <h1 className="text-2xl font-bold text-heading mb-3">{t('checkout.empty.title')}</h1>
           <p className="text-volcanic-400 mb-8">
-            Ajoutez des articles depuis la boutique pour passer commande.
+            {t('checkout.empty.description')}
           </p>
           <Link
             to="/products"
             className="inline-flex items-center gap-2 px-6 py-3 bg-ark-600 hover:bg-ark-500 text-white font-semibold rounded-xl transition-colors"
           >
             <ShoppingBag className="w-4 h-4" />
-            Voir la boutique
+            {t('checkout.empty.cta')}
           </Link>
         </div>
       </div>
@@ -289,20 +291,20 @@ export default function CheckoutPage() {
             className="inline-flex items-center gap-2 hover:text-heading transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour
+            {t('checkout.back')}
           </button>
           <span>/</span>
-          <span className="text-volcanic-500">Paiement</span>
+          <span className="text-volcanic-500">{t('checkout.breadcrumb_payment')}</span>
         </div>
 
-        <h1 className="text-3xl lg:text-4xl font-bold text-heading mb-10">Finaliser la commande</h1>
+        <h1 className="text-3xl lg:text-4xl font-bold text-heading mb-10">{t('checkout.title')}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
           <div className="lg:col-span-3 space-y-8">
             <section>
               <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-ark-500" />
-                Votre panier ({items.length} article{items.length > 1 ? 's' : ''})
+                {t('checkout.section_cart')} ({items.length} {items.length > 1 ? t('cart.items_plural') : t('cart.items_singular')})
               </h2>
               <div className="space-y-3">
                 {items.map((item) => {
@@ -349,7 +351,7 @@ export default function CheckoutPage() {
                                       ? 'bg-ark-600/15 text-ark-400'
                                       : 'bg-volcanic-700/50 text-volcanic-300'
                                   }`}>
-                                    {item.purchaseType === 'subscribe' ? 'Abonnement' : '1 mois'}
+                                    {item.purchaseType === 'subscribe' ? t('checkout.badge.subscription') : t('checkout.badge.one_month')}
                                   </span>
                                 )}
                               </div>
@@ -357,7 +359,7 @@ export default function CheckoutPage() {
                             <button
                               onClick={() => {
                                 removeItem(item.id);
-                                addToast(`${item.product.name} retiré du panier`, 'info');
+                                addToast(t('checkout.toast.item_removed', { name: item.product.name }), 'info');
                               }}
                               className="shrink-0 p-1.5 text-volcanic-500 hover:text-red-400 transition-colors"
                             >
@@ -395,7 +397,7 @@ export default function CheckoutPage() {
                             </div>
                             {extras > 0 && (
                               <p className="text-xs text-volcanic-400">
-                                Prix de base: {item.product.price.toFixed(2)} € + Options: {extras.toFixed(2)} €
+                                {t('common.base_price_prefix')} {item.product.price.toFixed(2)} € {t('common.plus_options')} {extras.toFixed(2)} €
                               </p>
                             )}
                           </div>
@@ -410,14 +412,14 @@ export default function CheckoutPage() {
             {loadingInit ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-5 h-5 text-ark-500 animate-spin mr-2" />
-                <span className="text-volcanic-400 text-sm">Chargement des informations...</span>
+                <span className="text-volcanic-400 text-sm">{t('checkout.loading_info')}</span>
               </div>
             ) : (
               requiredIdentifiers.length > 0 && (
                 <section>
                   <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-ark-500" />
-                    Informations de livraison
+                    {t('checkout.section_delivery_info')}
                   </h2>
                   <div className="glass-card p-6 space-y-5">
                     {requiredIdentifiers.map((id) => {
@@ -452,7 +454,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <div className="lg:sticky lg:top-28 space-y-5">
               <div className="glass-card p-6 space-y-5">
-                <h2 className="text-lg font-semibold text-heading">Récapitulatif</h2>
+                <h2 className="text-lg font-semibold text-heading">{t('checkout.summary.title')}</h2>
 
                 <div className="space-y-3 text-sm">
                   {items.map((item) => {
@@ -473,7 +475,7 @@ export default function CheckoutPage() {
                         </div>
                         {extras > 0 && (
                           <div className="text-xs text-volcanic-500 pl-2">
-                            Base: {item.product.price.toFixed(2)} € + Options: {extras.toFixed(2)} €
+                            {t('common.base_short')} {item.product.price.toFixed(2)} € {t('common.plus_options')} {extras.toFixed(2)} €
                           </div>
                         )}
                       </div>
@@ -483,13 +485,13 @@ export default function CheckoutPage() {
 
                 <div className="border-t border-volcanic-800/50 pt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-volcanic-300 font-medium">Total</span>
+                    <span className="text-volcanic-300 font-medium">{t('common.total')}</span>
                     <span className="text-2xl font-bold text-heading">
                       {cartTotal.toFixed(2)} &euro;
                     </span>
                   </div>
                   <p className="text-xs text-volcanic-500 mt-2">
-                    Les codes promo et cartes cadeaux peuvent être appliqués sur la page de paiement.
+                    {t('checkout.summary.promo_note')}
                   </p>
                 </div>
 
@@ -515,7 +517,7 @@ export default function CheckoutPage() {
                     className="mt-0.5 w-4 h-4 shrink-0 rounded border-volcanic-600 bg-volcanic-800 text-ark-600 focus:ring-ark-600/30 focus:ring-offset-0 cursor-pointer accent-ark-600"
                   />
                   <span className="text-xs text-volcanic-400 leading-relaxed group-hover:text-volcanic-300 transition-colors select-none">
-                    Conformément à l'article L221-28 du Code de la consommation, le client renonce à son droit de rétractation dès l'accès au contenu numérique. Aucun remboursement ne sera possible après activation, sauf défaut technique avéré.
+                    {t('checkout.terms.text')}
                     <span className="text-red-400 ml-0.5">*</span>
                   </span>
                 </label>
@@ -528,12 +530,12 @@ export default function CheckoutPage() {
                   {loadingCheckout ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Redirection...
+                      {t('checkout.button.redirecting')}
                     </>
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
-                      Payer {cartTotal.toFixed(2)} &euro;
+                      {t('checkout.button.pay')} {cartTotal.toFixed(2)} &euro;
                     </>
                   )}
                 </button>
@@ -541,11 +543,11 @@ export default function CheckoutPage() {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2 text-xs text-volcanic-500">
                     <ShieldCheck className="w-4 h-4 text-ark-600 shrink-0" />
-                    <span>Paiement sécurisé et chiffré</span>
+                    <span>{t('checkout.trust.secure_encrypted')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-volcanic-500">
                     <Zap className="w-4 h-4 text-ark-600 shrink-0" />
-                    <span>Livraison automatique instantanée</span>
+                    <span>{t('checkout.trust.auto_instant')}</span>
                   </div>
                 </div>
               </div>

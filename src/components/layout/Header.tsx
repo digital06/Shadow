@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, Hop as Home, Package, ExternalLink, LogIn, Link2 } from 'lucide-react';
+import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, Hop as Home, Package, ExternalLink, LogIn, Link2, Globe, Check } from 'lucide-react';
 import { useCart } from '../../lib/cart';
 import { useStore } from '../../lib/store';
 import { useTheme } from '../../lib/theme';
+import { useLanguage, type Language } from '../../lib/i18n';
 import { getCategories } from '../../lib/api';
 import { getCategoryIcon } from '../../lib/categoryIcons';
 import { stripHtml } from '../../lib/utils';
@@ -12,14 +13,17 @@ import type { Category } from '../../lib/types';
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const megaTimeout = useRef<ReturnType<typeof setTimeout>>();
   const megaRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { itemCount, openCart } = useCart();
   const { store } = useStore();
   const { theme, toggleTheme } = useTheme();
+  const { lang, setLang, t } = useLanguage();
   const storeName = store?.title || 'ARK Shop';
   const menuLinks = store?.menu_links ?? [];
   const loginUrl = store?.domain
@@ -45,7 +49,18 @@ export default function Header() {
   useEffect(() => {
     setMobileOpen(false);
     setMegaOpen(false);
+    setLangOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    }
+    if (langOpen) document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [langOpen]);
 
   const openMega = useCallback(() => {
     clearTimeout(megaTimeout.current);
@@ -61,6 +76,11 @@ export default function Header() {
   }, []);
 
   const isProductsActive = location.pathname === '/products';
+
+  const languages: { code: Language; label: string; flag: string }[] = [
+    { code: 'fr', label: t('lang.fr'), flag: 'FR' },
+    { code: 'en', label: t('lang.en'), flag: 'EN' },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
@@ -87,7 +107,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-1">
             <NavLink to="/" active={location.pathname === '/'}>
               <Home className="w-4 h-4" />
-              Accueil
+              {t('header.home')}
             </NavLink>
 
             <div
@@ -98,7 +118,7 @@ export default function Header() {
             >
               <NavLink to="/products" active={isProductsActive}>
                 <Package className="w-4 h-4" />
-                Tous les produits
+                {t('header.all_products')}
                 {categories.length > 0 && (
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${megaOpen ? 'rotate-180' : ''}`} />
                 )}
@@ -116,8 +136,8 @@ export default function Header() {
                           <LayoutGrid className="w-4 h-4 text-ark-500" />
                         </div>
                         <div>
-                          <span className="block text-sm font-semibold text-heading">Tous les produits</span>
-                          <span className="block text-xs text-volcanic-500">Voir le catalogue complet</span>
+                          <span className="block text-sm font-semibold text-heading">{t('header.all_products')}</span>
+                          <span className="block text-xs text-volcanic-500">{t('header.view_full_catalog')}</span>
                         </div>
                       </Link>
                     </div>
@@ -180,13 +200,52 @@ export default function Header() {
               className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60 transition-all duration-200"
             >
               <LogIn className="w-4 h-4" />
-              <span>Connexion</span>
+              <span>{t('header.login')}</span>
             </a>
+
+            <div ref={langRef} className="relative hidden md:block">
+              <button
+                onClick={() => setLangOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60 transition-all duration-200"
+                title={t('lang.switch')}
+                aria-label={t('lang.switch')}
+              >
+                <Globe className="w-4 h-4" />
+                <span className="uppercase text-xs font-semibold tracking-wider">{lang}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${langOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {langOpen && (
+                <div className="absolute top-full right-0 mt-2 w-44 bg-volcanic-900/95 backdrop-blur-2xl border border-volcanic-800/60 rounded-xl shadow-2xl shadow-black/40 overflow-hidden animate-fade-in-down p-1.5 z-50">
+                  {languages.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => {
+                        setLang(l.code);
+                        setLangOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        lang === l.code
+                          ? 'bg-ark-600/15 text-ark-400'
+                          : 'text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-volcanic-800/80 text-[10px] font-bold tracking-wider">
+                          {l.flag}
+                        </span>
+                        {l.label}
+                      </span>
+                      {lang === l.code && <Check className="w-4 h-4" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <button
               onClick={toggleTheme}
               className="p-2.5 text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60 rounded-lg transition-all duration-300 hover:rotate-12"
-              title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+              title={theme === 'dark' ? t('header.theme_light') : t('header.theme_dark')}
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
@@ -225,7 +284,7 @@ export default function Header() {
                 }`}
               >
                 <Home className="w-4 h-4" />
-                Accueil
+                {t('header.home')}
               </Link>
               <Link
                 to="/products"
@@ -237,7 +296,7 @@ export default function Header() {
                 }`}
               >
                 <Package className="w-4 h-4" />
-                Tous les produits
+                {t('header.all_products')}
               </Link>
               {menuLinks.map((item) => (
                 <a
@@ -259,14 +318,39 @@ export default function Header() {
                 className="flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/40 transition-all duration-200"
               >
                 <LogIn className="w-4 h-4" />
-                Connexion
+                {t('header.login')}
               </a>
+
+              <div className="pt-2 pb-1">
+                <div className="divider-gradient mb-3" />
+                <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-volcanic-500">
+                  {t('lang.switch')}
+                </p>
+                <div className="grid grid-cols-2 gap-2 px-2">
+                  {languages.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => setLang(l.code)}
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        lang === l.code
+                          ? 'bg-ark-600/15 text-ark-400 border border-ark-600/30'
+                          : 'text-volcanic-300 hover:text-heading hover:bg-volcanic-800/40 border border-volcanic-800/40'
+                      }`}
+                    >
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-volcanic-800/80 text-[10px] font-bold tracking-wider">
+                        {l.flag}
+                      </span>
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {categories.length > 0 && (
                 <div className="pt-2 pb-1">
                   <div className="divider-gradient mb-3" />
                   <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-volcanic-500">
-                    Categories
+                    {t('header.categories')}
                   </p>
                   <div className="grid grid-cols-2 gap-0.5">
                     {categories.map((cat) => {
@@ -301,7 +385,7 @@ export default function Header() {
                 className="w-full flex items-center justify-center gap-2 mt-3 px-4 py-3 bg-volcanic-800/60 text-heading text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-volcanic-800"
               >
                 <ShoppingCart className="w-4 h-4" />
-                Panier {itemCount > 0 && `(${itemCount})`}
+                {t('header.cart')} {itemCount > 0 && `(${itemCount})`}
               </button>
             </div>
           </div>

@@ -1,4 +1,7 @@
+import { useT } from '../../lib/i18n';
+
 export default function LoadingSpinner() {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
       <div className="relative w-12 h-12">
@@ -6,7 +9,7 @@ export default function LoadingSpinner() {
         <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-ark-500 animate-spin" />
         <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-ark-400/50 animate-spin-slow" />
       </div>
-      <p className="text-sm text-volcanic-500 animate-pulse">Chargement...</p>
+      <p className="text-sm text-volcanic-500 animate-pulse">{t('common.loading')}</p>
     </div>
   );
 }

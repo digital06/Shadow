@@ -7,12 +7,14 @@ import { getAllProducts, getCategories } from '../lib/api';
 import { fallbackProducts, fallbackCategories } from '../data/fallback';
 import { getCategoryIcon } from '../lib/categoryIcons';
 import type { Product, Category } from '../lib/types';
+import { useT } from '../lib/i18n';
 
 type SortOption = 'name' | 'price-asc' | 'price-desc' | 'newest' | 'popular';
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeSlug = searchParams.get('category');
+  const t = useT();
 
   const [allProducts, setAllProducts] = useState<Product[]>(fallbackProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(fallbackProducts);
@@ -144,16 +146,16 @@ export default function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
           <h1 className="text-3xl lg:text-4xl font-bold text-heading mb-3">
-            {activeCategoryName || 'Tous les produits'}
+            {activeCategoryName || t('products.page.title_all')}
           </h1>
           <p className="text-volcanic-400 text-lg">
             {activeCategoryName
-              ? `Parcourir les produits de la catégorie ${activeCategoryName}`
-              : 'Découvrez notre catalogue complet pour ARK Ascended'}
+              ? t('products.page.subtitle_category', { name: activeCategoryName })
+              : t('products.page.subtitle_all')}
           </p>
           {(activeSlug || search) && (
             <p className="text-ark-400 font-medium mt-2">
-              {filtered.length} produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
+              {filtered.length} {filtered.length !== 1 ? t('products.page.found_plural') : t('products.page.found_singular')}
             </p>
           )}
         </div>
@@ -164,7 +166,7 @@ export default function ProductsPage() {
               <div className="bg-volcanic-900/60 border border-volcanic-800/50 rounded-xl p-4">
                 <h2 className="text-sm font-semibold text-heading mb-3 flex items-center gap-2">
                   <LayoutGrid className="w-4 h-4" />
-                  Catégories
+                  {t('products.page.sidebar_categories')}
                 </h2>
                 <div className="space-y-1">
                   <button
@@ -176,7 +178,7 @@ export default function ProductsPage() {
                     }`}
                   >
                     <LayoutGrid className="w-4 h-4 flex-shrink-0" />
-                    <span>Tous les produits</span>
+                    <span>{t('products.page.title_all')}</span>
                   </button>
                   {categories.map((cat) => {
                     const Icon = getCategoryIcon(cat.slug || cat.name);
@@ -209,7 +211,7 @@ export default function ProductsPage() {
                 <div className="relative flex-1 group">
                   <input
                     type="text"
-                    placeholder="Rechercher un produit..."
+                    placeholder={t('products.page.search_placeholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="input-field pl-11"
@@ -223,11 +225,11 @@ export default function ProductsPage() {
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
                     className="input-field pl-11 appearance-none cursor-pointer"
                   >
-                    <option value="name">Nom (A-Z)</option>
-                    <option value="newest">Plus récents</option>
-                    <option value="popular">Populaires</option>
-                    <option value="price-asc">Prix croissant</option>
-                    <option value="price-desc">Prix décroissant</option>
+                    <option value="name">{t('products.sort.name')}</option>
+                    <option value="newest">{t('products.sort.newest')}</option>
+                    <option value="popular">{t('products.sort.popular')}</option>
+                    <option value="price-asc">{t('products.sort.price_asc')}</option>
+                    <option value="price-desc">{t('products.sort.price_desc')}</option>
                   </select>
                   <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-volcanic-500 pointer-events-none" />
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -243,10 +245,10 @@ export default function ProductsPage() {
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
                     className="input-field pl-11 appearance-none cursor-pointer"
                   >
-                    <option value={12}>12 par page</option>
-                    <option value={24}>24 par page</option>
-                    <option value={48}>48 par page</option>
-                    <option value={96}>96 par page</option>
+                    <option value={12}>{t('products.per_page', { n: 12 })}</option>
+                    <option value={24}>{t('products.per_page', { n: 24 })}</option>
+                    <option value={48}>{t('products.per_page', { n: 48 })}</option>
+                    <option value={96}>{t('products.per_page', { n: 96 })}</option>
                   </select>
                   <Rows3 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-volcanic-500 pointer-events-none" />
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -285,7 +287,7 @@ export default function ProductsPage() {
                       disabled={currentPage === 1}
                       className="px-4 py-2 rounded-lg bg-volcanic-800/60 text-volcanic-300 hover:bg-volcanic-800 hover:text-heading disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
                     >
-                      Précédent
+                      {t('products.pagination.prev')}
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -324,7 +326,7 @@ export default function ProductsPage() {
                       disabled={currentPage === totalPages}
                       className="px-4 py-2 rounded-lg bg-volcanic-800/60 text-volcanic-300 hover:bg-volcanic-800 hover:text-heading disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
                     >
-                      Suivant
+                      {t('products.pagination.next')}
                     </button>
                   </div>
                 )}

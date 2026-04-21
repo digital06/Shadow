@@ -4,6 +4,7 @@ import type { Product } from '../../lib/types';
 import { translatePeriodicity } from '../../lib/utils';
 import Badge from '../ui/Badge';
 import DiscountCountdown from '../ui/DiscountCountdown';
+import { useLanguage } from '../../lib/i18n';
 
 interface Props {
   product: Product;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ProductCard({ product, index = 0 }: Props) {
+  const { t, lang } = useLanguage();
   const isNew = product.slug?.toLowerCase().includes('new') ||
                 product.name?.toLowerCase().includes('nouveau') ||
                 (product.id && product.id > 9000);
@@ -38,17 +40,17 @@ export default function ProductCard({ product, index = 0 }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-volcanic-950/70 via-volcanic-950/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
 
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {isNew && <Badge variant="new">Nouveau</Badge>}
+          {isNew && <Badge variant="new">{t('product.badge.new')}</Badge>}
           {product.percent_off && product.percent_off > 0 && (
             <Badge variant="discount">-{product.percent_off}%</Badge>
           )}
           {product.subscription && (
             <Badge variant="subscription">
               <RefreshCw className="w-3 h-3 mr-1" />
-              Abo
+              {t('product.badge.subscription_short')}
             </Badge>
           )}
-          {product.featured && <Badge variant="featured">Star</Badge>}
+          {product.featured && <Badge variant="featured">{t('product.badge.star')}</Badge>}
         </div>
       </div>
 
@@ -78,7 +80,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
             </div>
             {product.subscription && product.duration_periodicity && (
               <span className="text-xs text-volcanic-500">
-                /{translatePeriodicity(product.duration_periodicity!)}
+                /{translatePeriodicity(product.duration_periodicity!, lang)}
               </span>
             )}
           </div>

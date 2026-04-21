@@ -64,19 +64,31 @@ export function getCustomFieldDefaults(fields: CustomField[]): Record<string, st
   return defaults;
 }
 
-const periodicityMap: Record<string, string> = {
-  month: 'mois',
-  months: 'mois',
-  week: 'semaine',
-  weeks: 'semaines',
-  day: 'jour',
-  days: 'jours',
-  year: 'an',
-  years: 'ans',
+const periodicityMap: Record<'fr' | 'en', Record<string, string>> = {
+  fr: {
+    month: 'mois',
+    months: 'mois',
+    week: 'semaine',
+    weeks: 'semaines',
+    day: 'jour',
+    days: 'jours',
+    year: 'an',
+    years: 'ans',
+  },
+  en: {
+    month: 'month',
+    months: 'months',
+    week: 'week',
+    weeks: 'weeks',
+    day: 'day',
+    days: 'days',
+    year: 'year',
+    years: 'years',
+  },
 };
 
-export function translatePeriodicity(value: string): string {
-  return periodicityMap[value.toLowerCase()] || value;
+export function translatePeriodicity(value: string, lang: 'fr' | 'en' = 'fr'): string {
+  return periodicityMap[lang][value.toLowerCase()] || value;
 }
 
 export function decodeHtmlEntities(text: string): string {

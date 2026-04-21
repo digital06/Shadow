@@ -1,12 +1,14 @@
 import { Sparkles } from 'lucide-react';
 import ProductCard from '../products/ProductCard';
 import type { Product } from '../../lib/types';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   products: Product[];
 }
 
 export default function LatestProducts({ products }: Props) {
+  const t = useT();
   const latestProducts = products
     .sort((a, b) => b.id - a.id)
     .slice(0, 8);
@@ -22,10 +24,10 @@ export default function LatestProducts({ products }: Props) {
           </div>
           <div>
             <h2 className="text-3xl lg:text-4xl font-bold text-heading">
-              Derniers produits ajoutés
+              {t('home.latest.title')}
             </h2>
             <p className="text-volcanic-400 mt-1">
-              Découvrez nos nouveautés fraîchement arrivées
+              {t('home.latest.subtitle')}
             </p>
           </div>
         </div>

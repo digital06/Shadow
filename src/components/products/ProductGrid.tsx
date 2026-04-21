@@ -1,6 +1,7 @@
 import { ShoppingBag } from 'lucide-react';
 import type { Product } from '../../lib/types';
 import ProductCard from './ProductCard';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   products: Product[];
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function ProductGrid({ products, loading }: Props) {
+  const t = useT();
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
@@ -25,10 +27,10 @@ export default function ProductGrid({ products, loading }: Props) {
           <ShoppingBag className="w-8 h-8 text-volcanic-600" />
         </div>
         <p className="text-volcanic-400 text-lg mb-1">
-          Aucun produit trouve dans cette categorie.
+          {t('products.grid.empty_title')}
         </p>
         <p className="text-volcanic-500 text-sm">
-          Essayez de modifier vos filtres ou votre recherche.
+          {t('products.grid.empty_help')}
         </p>
       </div>
     );

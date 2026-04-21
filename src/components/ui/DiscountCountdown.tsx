@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Timer } from 'lucide-react';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   endTimestamp: number;
@@ -24,6 +25,7 @@ function getTimeLeft(end: number) {
 }
 
 export default function DiscountCountdown({ endTimestamp, compact = false }: Props) {
+  const t = useT();
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(endTimestamp));
 
   useEffect(() => {
@@ -39,10 +41,10 @@ export default function DiscountCountdown({ endTimestamp, compact = false }: Pro
 
   if (compact) {
     const parts: string[] = [];
-    if (timeLeft.days > 0) parts.push(`${timeLeft.days}j`);
-    parts.push(`${String(timeLeft.hours).padStart(2, '0')}h`);
-    parts.push(`${String(timeLeft.minutes).padStart(2, '0')}m`);
-    if (timeLeft.days === 0) parts.push(`${String(timeLeft.seconds).padStart(2, '0')}s`);
+    if (timeLeft.days > 0) parts.push(`${timeLeft.days}${t('countdown.unit_days')}`);
+    parts.push(`${String(timeLeft.hours).padStart(2, '0')}${t('countdown.unit_hours')}`);
+    parts.push(`${String(timeLeft.minutes).padStart(2, '0')}${t('countdown.unit_minutes')}`);
+    if (timeLeft.days === 0) parts.push(`${String(timeLeft.seconds).padStart(2, '0')}${t('countdown.unit_seconds')}`);
 
     return (
       <div className="flex items-center gap-1 text-[10px] font-semibold text-red-400">
@@ -56,14 +58,14 @@ export default function DiscountCountdown({ endTimestamp, compact = false }: Pro
     <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
       <Timer className="w-4 h-4 text-red-400 shrink-0" />
       <div className="flex items-center gap-1.5 text-sm font-medium text-red-400">
-        <span className="text-red-300/80 text-xs">Offre expire dans</span>
+        <span className="text-red-300/80 text-xs">{t('countdown.label')}</span>
         <div className="flex items-center gap-1">
           {timeLeft.days > 0 && (
-            <Unit value={timeLeft.days} label="j" />
+            <Unit value={timeLeft.days} label={t('countdown.unit_days')} />
           )}
-          <Unit value={timeLeft.hours} label="h" />
-          <Unit value={timeLeft.minutes} label="m" />
-          <Unit value={timeLeft.seconds} label="s" />
+          <Unit value={timeLeft.hours} label={t('countdown.unit_hours')} />
+          <Unit value={timeLeft.minutes} label={t('countdown.unit_minutes')} />
+          <Unit value={timeLeft.seconds} label={t('countdown.unit_seconds')} />
         </div>
       </div>
     </div>

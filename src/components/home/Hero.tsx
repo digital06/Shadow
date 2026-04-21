@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, ChevronRight } from 'lucide-react';
 import { getCategories, getProducts } from '../../lib/api';
 import { useStore } from '../../lib/store';
+import { useT } from '../../lib/i18n';
 import type { Category } from '../../lib/types';
 
 function stripHtml(html: string): string {
@@ -16,6 +17,7 @@ export default function Hero() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [productCount, setProductCount] = useState<number | null>(null);
   const { store } = useStore();
+  const t = useT();
 
   useEffect(() => {
     getCategories()
@@ -38,8 +40,8 @@ export default function Hero() {
     .trim();
 
   const fallbackDescription = categories.length > 0
-    ? `${categories.map((cat) => cat.name).join(', ')}. Achetez en toute sécurité et recevez vos items instantanément en jeu.`
-    : 'Dinos, kits, rangs VIP et bien plus encore. Achetez en toute sécurité et recevez vos items instantanément en jeu.';
+    ? `${categories.map((cat) => cat.name).join(', ')}. ${t('hero.description_suffix')}`
+    : t('hero.description_fallback');
   const description = descriptionText || subtitle || fallbackDescription;
 
   return (
@@ -66,20 +68,20 @@ export default function Hero() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-ark-500" />
             </span>
             <span className="text-sm text-ark-400 font-medium">
-              {subtitle || 'Livraison instantanée sur votre serveur'}
+              {subtitle || t('hero.badge_fallback')}
             </span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-heading leading-[1.1] tracking-tight animate-slide-up">
             {title ? (
               <>
-                Bienvenue sur{' '}
+                {t('hero.welcome_prefix')}{' '}
                 <span className="text-gradient">{title}</span>
               </>
             ) : (
               <>
-                Boutique PC/Console{' '}
-                <span className="text-gradient">des serveurs ARK FRANCE</span>
+                {t('hero.title_fallback_1')}{' '}
+                <span className="text-gradient">{t('hero.title_fallback_2')}</span>
               </>
             )}
           </h1>
@@ -100,7 +102,7 @@ export default function Hero() {
               className="btn-primary group gap-2 px-8 py-4 text-base shadow-xl shadow-ark-600/25 hover:shadow-ark-500/35"
             >
               <ShoppingBag className="w-5 h-5" />
-              Explorer la Boutique
+              {t('hero.cta_explore')}
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -109,11 +111,11 @@ export default function Hero() {
             className="flex items-center gap-8 pt-4 animate-slide-up"
             style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
           >
-            <StatBlock value={productCount !== null ? String(productCount) : '...'} label="Produits" />
+            <StatBlock value={productCount !== null ? String(productCount) : '...'} label={t('hero.stat_products')} />
             <div className="w-px h-10 bg-gradient-to-b from-transparent via-volcanic-700 to-transparent" />
-            <StatBlock value="24/7" label="Livraison" />
+            <StatBlock value="24/7" label={t('hero.stat_delivery')} />
             <div className="w-px h-10 bg-gradient-to-b from-transparent via-volcanic-700 to-transparent" />
-            <StatBlock value="100%" label="Sécurisé" />
+            <StatBlock value="100%" label={t('hero.stat_secure')} />
           </div>
         </div>
       </div>

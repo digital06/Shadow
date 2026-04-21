@@ -2,11 +2,13 @@ import { Gamepad2, ExternalLink, Hop as Home, Package, Link2 } from 'lucide-reac
 import { Link } from 'react-router-dom';
 import { useStore } from '../../lib/store';
 import { stripHtml } from '../../lib/utils';
+import { useT } from '../../lib/i18n';
 
 export default function Footer() {
   const { store } = useStore();
+  const t = useT();
   const storeName = store?.title || 'ARK Shop';
-  const storeDesc = stripHtml(store?.description || '') || 'La boutique officielle pour vos produits ARK: Survival Ascended. Livraison instantanee sur votre serveur.';
+  const storeDesc = stripHtml(store?.description || '') || t('footer.default_description');
   const menuLinks = store?.menu_links || [];
 
   return (
@@ -33,7 +35,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold text-heading uppercase tracking-wider mb-4">
-              Navigation
+              {t('footer.navigation')}
             </h3>
             <ul className="space-y-3">
               <li>
@@ -42,7 +44,7 @@ export default function Footer() {
                   className="inline-flex items-center gap-2 text-sm text-volcanic-400 hover:text-ark-400 hover:translate-x-1 transition-all duration-200"
                 >
                   <Home className="w-3.5 h-3.5" />
-                  Accueil
+                  {t('footer.home')}
                 </Link>
               </li>
               <li>
@@ -51,7 +53,7 @@ export default function Footer() {
                   className="inline-flex items-center gap-2 text-sm text-volcanic-400 hover:text-ark-400 hover:translate-x-1 transition-all duration-200"
                 >
                   <Package className="w-3.5 h-3.5" />
-                  Boutique
+                  {t('footer.shop')}
                 </Link>
               </li>
               {menuLinks.map((item, idx) => (
@@ -73,10 +75,10 @@ export default function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold text-heading uppercase tracking-wider mb-4">
-              Paiement securise
+              {t('footer.secure_payment')}
             </h3>
             <p className="text-sm text-volcanic-400 leading-relaxed mb-4">
-              Tous les paiements sont traites de maniere securisee via Tip4Serv.
+              {t('footer.secure_payment_desc')}
             </p>
             <a
               href="https://tip4serv.com"
@@ -92,7 +94,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-volcanic-800/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-volcanic-500">
-            &copy; {new Date().getFullYear()} {storeName}. Tous droits reserves.
+            &copy; {new Date().getFullYear()} {storeName}. {t('footer.rights_reserved')}
           </p>
         </div>
       </div>

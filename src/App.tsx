@@ -3,6 +3,7 @@ import { CartProvider } from './lib/cart';
 import { StoreProvider } from './lib/store';
 import { ThemeProvider } from './lib/theme';
 import { ToastProvider } from './lib/toast';
+import { LanguageProvider } from './lib/i18n';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
+        <LanguageProvider>
         <ToastProvider>
           <StoreProvider>
             <CartProvider>
@@ -40,6 +42,7 @@ export default function App() {
             </CartProvider>
           </StoreProvider>
         </ToastProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

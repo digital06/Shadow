@@ -8,12 +8,14 @@ import { isNiveauHidden, isNiveauField } from '../../lib/utils';
 import type { CustomField } from '../../lib/types';
 import CrossSellSection from './CrossSellSection';
 import CartItemFields from './CartItemFields';
+import { useT } from '../../lib/i18n';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, updateCustomFields, clearCart } = useCart();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const t = useT();
 
   useEffect(() => {
     if (isOpen) {
@@ -59,10 +61,10 @@ export default function CartDrawer() {
                   <ShoppingCart className="w-4 h-4 text-ark-500" />
                 </div>
                 <h2 className="text-lg font-bold text-heading">
-                  Panier
+                  {t('cart.title')}
                   {items.length > 0 && (
                     <span className="ml-2 text-sm font-normal text-volcanic-400">
-                      ({items.length} article{items.length > 1 ? 's' : ''})
+                      ({items.length} {items.length > 1 ? t('cart.items_plural') : t('cart.items_singular')})
                     </span>
                   )}
                 </h2>
@@ -72,10 +74,10 @@ export default function CartDrawer() {
                   <button
                     onClick={() => {
                       clearCart();
-                      addToast('Panier vide', 'info');
+                      addToast(t('cart.toast.cleared'), 'info');
                     }}
                     className="p-2 text-volcanic-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
-                    title="Vider le panier"
+                    title={t('cart.clear_tooltip')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -95,9 +97,9 @@ export default function CartDrawer() {
                   <div className="w-20 h-20 rounded-full bg-volcanic-800/40 flex items-center justify-center mb-5">
                     <ShoppingBag className="w-10 h-10 text-volcanic-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-heading mb-2">Panier vide</h3>
+                  <h3 className="text-lg font-semibold text-heading mb-2">{t('cart.empty.title')}</h3>
                   <p className="text-sm text-volcanic-400 mb-6">
-                    Parcourez la boutique et ajoutez des articles.
+                    {t('cart.empty.description')}
                   </p>
                   <Link
                     to="/products"
@@ -105,7 +107,7 @@ export default function CartDrawer() {
                     className="btn-primary px-5 py-2.5 text-sm"
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    Voir la boutique
+                    {t('cart.empty.cta')}
                   </Link>
                 </div>
               ) : (
@@ -160,7 +162,7 @@ export default function CartDrawer() {
                                     ? 'bg-ark-600/15 text-ark-400'
                                     : 'bg-volcanic-700/50 text-volcanic-300'
                                 }`}>
-                                  {item.purchaseType === 'subscribe' ? 'Abo' : '1 mois'}
+                                  {item.purchaseType === 'subscribe' ? t('cart.badge.subscription_short') : t('cart.badge.one_month')}
                                 </span>
                               )}
                             </div>
@@ -168,7 +170,7 @@ export default function CartDrawer() {
                               {unitPrice.toFixed(2)} &euro;
                               {extras > 0 && (
                                 <span className="text-xs text-volcanic-500 font-normal ml-1">
-                                  (base {item.product.price.toFixed(2)} + options {extras.toFixed(2)})
+                                  ({t('cart.price.base_label')} {item.product.price.toFixed(2)} + {t('cart.price.options_label')} {extras.toFixed(2)})
                                 </span>
                               )}
                             </p>
@@ -177,7 +179,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() => {
                               removeItem(item.id);
-                              addToast(`${item.product.name} retire du panier`, 'info');
+                              addToast(t('cart.toast.item_removed', { name: item.product.name }), 'info');
                             }}
                             className="shrink-0 p-1.5 text-volcanic-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200 self-start"
                           >
@@ -204,7 +206,7 @@ export default function CartDrawer() {
                           </button>
                           {item.quantity > 1 && (
                             <span className="text-xs text-volcanic-500 ml-auto">
-                              Sous-total: {(unitPrice * item.quantity).toFixed(2)} &euro;
+                              {t('common.subtotal')} {(unitPrice * item.quantity).toFixed(2)} &euro;
                             </span>
                           )}
                         </div>
@@ -223,7 +225,7 @@ export default function CartDrawer() {
                               className="flex items-center gap-1.5 text-[11px] font-medium text-volcanic-400 hover:text-ark-400 transition-colors"
                             >
                               <Settings2 className="w-3 h-3" />
-                              {expandedItems.has(item.id) ? 'Masquer les options' : 'Modifier les options'}
+                              {expandedItems.has(item.id) ? t('cart.options.hide') : t('cart.options.edit')}
                             </button>
                             {expandedItems.has(item.id) ? (
                               <CartItemFields
@@ -256,7 +258,7 @@ export default function CartDrawer() {
               <div className="border-t border-volcanic-800/50 p-5 space-y-4 bg-volcanic-900/80 backdrop-blur-lg">
                 <DiscountProgressBar total={cartTotal} />
                 <div className="flex items-center justify-between">
-                  <span className="text-volcanic-400">Total</span>
+                  <span className="text-volcanic-400">{t('common.total')}</span>
                   <span className="text-xl font-bold text-heading">
                     {cartTotal.toFixed(2)} &euro;
                   </span>
@@ -269,7 +271,7 @@ export default function CartDrawer() {
                   className="btn-primary w-full py-3.5"
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  Commander ({cartTotal.toFixed(2)} &euro;)
+                  {t('cart.checkout_button')} ({cartTotal.toFixed(2)} &euro;)
                 </button>
               </div>
             )}
@@ -286,8 +288,9 @@ const DISCOUNT_TIERS = [
 ];
 
 function DiscountProgressBar({ total }: { total: number }) {
-  const currentTier = DISCOUNT_TIERS.filter((t) => total >= t.threshold).pop();
-  const nextTier = DISCOUNT_TIERS.find((t) => total < t.threshold);
+  const t = useT();
+  const currentTier = DISCOUNT_TIERS.filter((tier) => total >= tier.threshold).pop();
+  const nextTier = DISCOUNT_TIERS.find((tier) => total < tier.threshold);
 
   const progressBase = currentTier ? currentTier.threshold : 0;
   const progressTarget = nextTier ? nextTier.threshold : DISCOUNT_TIERS[DISCOUNT_TIERS.length - 1].threshold;
@@ -303,21 +306,21 @@ function DiscountProgressBar({ total }: { total: number }) {
         {currentTier ? (
           <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
             <Percent className="w-3.5 h-3.5" />
-            -{currentTier.discount}% applique !
+            -{currentTier.discount}% {t('cart.discount.applied')}
           </span>
         ) : (
           <span className="flex items-center gap-1.5 text-volcanic-400">
             <Gift className="w-3.5 h-3.5 text-ark-500" />
-            Debloquez des reductions
+            {t('cart.discount.unlock')}
           </span>
         )}
         {nextTier && (
           <span className="text-volcanic-500">
-            Plus que <span className="text-ark-400 font-medium">{remaining.toFixed(2)}&euro;</span> pour -{nextTier.discount}%
+            {t('cart.discount.remaining_prefix')} <span className="text-ark-400 font-medium">{remaining.toFixed(2)}&euro;</span> {t('cart.discount.remaining_suffix')} -{nextTier.discount}%
           </span>
         )}
         {!nextTier && (
-          <span className="text-emerald-500 font-medium">Reduction max atteinte</span>
+          <span className="text-emerald-500 font-medium">{t('cart.discount.max_reached')}</span>
         )}
       </div>
 
@@ -372,6 +375,7 @@ function CartItemOptionsSummary({
   fields: CustomField[];
   values: Record<string, string | number>;
 }) {
+  const t = useT();
   const hideNiveau = isNiveauHidden(fields, values);
 
   const isVisible = (f: CustomField): boolean => {
@@ -397,7 +401,7 @@ function CartItemOptionsSummary({
         const opt = f.options.find((o) => String(o.value) === String(val));
         if (opt) displayValue = opt.name;
       } else if (f.type === 'checkbox') {
-        displayValue = val === 1 || val === '1' ? 'Oui' : 'Non';
+        displayValue = val === 1 || val === '1' ? t('common.yes') : t('common.no');
       }
 
       return { name: f.name, value: displayValue };

@@ -3,6 +3,7 @@ import { Sparkles } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { getRelatedProducts } from '../../lib/api';
 import type { Product } from '../../lib/types';
+import { useT } from '../../lib/i18n';
 
 interface RelatedProductsProps {
   currentProductId: number;
@@ -15,6 +16,7 @@ export default function RelatedProducts({
   categoryId,
   limit = 4,
 }: RelatedProductsProps) {
+  const t = useT();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ export default function RelatedProducts({
             <Sparkles className="w-5 h-5 text-ark-500" />
           </div>
           <h2 className="text-2xl font-bold text-heading">
-            Vous pourriez aussi aimer
+            {t('crosssell.title')}
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

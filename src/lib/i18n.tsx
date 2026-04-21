@@ -1,0 +1,522 @@
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+
+export type Language = 'fr' | 'en';
+
+type Dict = Record<string, string>;
+
+const fr: Dict = {
+  'common.loading': 'Chargement...',
+  'common.back': 'Retour',
+  'common.total': 'Total',
+  'common.subtotal': 'Sous-total :',
+  'common.options': 'Options',
+  'common.base_price_prefix': 'Prix de base :',
+  'common.base_short': 'Base :',
+  'common.plus_options': '+ Options :',
+  'common.required': 'Requis',
+  'common.yes': 'Oui',
+  'common.no': 'Non',
+
+  'periodicity.month': 'mois',
+  'periodicity.months': 'mois',
+  'periodicity.week': 'semaine',
+  'periodicity.weeks': 'semaines',
+  'periodicity.day': 'jour',
+  'periodicity.days': 'jours',
+  'periodicity.year': 'an',
+  'periodicity.years': 'ans',
+
+  'lang.switch': 'Langue',
+  'lang.fr': 'Français',
+  'lang.en': 'English',
+
+  'header.home': 'Accueil',
+  'header.all_products': 'Tous les produits',
+  'header.view_full_catalog': 'Voir le catalogue complet',
+  'header.login': 'Connexion',
+  'header.theme_light': 'Mode clair',
+  'header.theme_dark': 'Mode sombre',
+  'header.cart': 'Panier',
+  'header.categories': 'Catégories',
+
+  'footer.navigation': 'Navigation',
+  'footer.home': 'Accueil',
+  'footer.shop': 'Boutique',
+  'footer.secure_payment': 'Paiement sécurisé',
+  'footer.secure_payment_desc': 'Tous les paiements sont traités de manière sécurisée via Tip4Serv.',
+  'footer.rights_reserved': 'Tous droits réservés.',
+  'footer.default_description': 'La boutique officielle pour vos produits ARK : Survival Ascended. Livraison instantanée sur votre serveur.',
+
+  'hero.badge_fallback': 'Livraison instantanée sur votre serveur',
+  'hero.welcome_prefix': 'Bienvenue sur',
+  'hero.title_fallback_1': 'Boutique PC/Console',
+  'hero.title_fallback_2': 'des serveurs ARK FRANCE',
+  'hero.cta_explore': 'Explorer la boutique',
+  'hero.stat_products': 'Produits',
+  'hero.stat_delivery': 'Livraison',
+  'hero.stat_secure': 'Sécurisé',
+  'hero.description_suffix': 'Achetez en toute sécurité et recevez vos items instantanément en jeu.',
+  'hero.description_fallback': 'Dinos, kits, rangs VIP et bien plus encore. Achetez en toute sécurité et recevez vos items instantanément en jeu.',
+
+  'home.categories.title': 'Parcourir par catégorie',
+  'home.categories.subtitle': 'Trouvez exactement ce dont vous avez besoin pour dominer sur ARK Ascended',
+  'home.categories.view_products': 'Voir les produits',
+
+  'home.featured.title': 'Produits en vedette',
+  'home.featured.subtitle': 'Les meilleurs articles sélectionnés pour améliorer votre expérience de jeu',
+  'home.featured.view_all': 'Voir tout',
+
+  'home.latest.title': 'Derniers produits ajoutés',
+  'home.latest.subtitle': 'Découvrez nos nouveautés fraîchement arrivées',
+
+  'cart.title': 'Panier',
+  'cart.items_singular': 'article',
+  'cart.items_plural': 'articles',
+  'cart.clear_tooltip': 'Vider le panier',
+  'cart.empty.title': 'Panier vide',
+  'cart.empty.description': 'Parcourez la boutique et ajoutez des articles.',
+  'cart.empty.cta': 'Voir la boutique',
+  'cart.toast.cleared': 'Panier vidé',
+  'cart.toast.item_removed': '{name} retiré du panier',
+  'cart.toast.item_added': '{name} ajouté au panier',
+  'cart.toast.subscription_conflict': 'Un abonnement est déjà dans le panier. Videz le panier pour ajouter ce produit.',
+  'cart.badge.subscription_short': 'Abo',
+  'cart.badge.one_month': '1 mois',
+  'cart.price.base_label': 'base',
+  'cart.price.options_label': 'options',
+  'cart.options.hide': 'Masquer les options',
+  'cart.options.edit': 'Modifier les options',
+  'cart.checkout_button': 'Commander',
+  'cart.discount.applied': 'appliquée !',
+  'cart.discount.unlock': 'Débloquez des réductions',
+  'cart.discount.remaining_prefix': 'Plus que',
+  'cart.discount.remaining_suffix': 'pour',
+  'cart.discount.max_reached': 'Réduction max atteinte',
+
+  'crosssell.title': 'Vous pourriez aussi aimer',
+  'crosssell.add_tooltip': 'Ajouter au panier',
+
+  'products.grid.empty_title': 'Aucun produit trouvé dans cette catégorie.',
+  'products.grid.empty_help': 'Essayez de modifier vos filtres ou votre recherche.',
+
+  'products.page.title_all': 'Tous les produits',
+  'products.page.subtitle_category': 'Parcourir les produits de la catégorie {name}',
+  'products.page.subtitle_all': 'Découvrez notre catalogue complet pour ARK Ascended',
+  'products.page.found_singular': 'produit trouvé',
+  'products.page.found_plural': 'produits trouvés',
+  'products.page.sidebar_categories': 'Catégories',
+  'products.page.search_placeholder': 'Rechercher un produit...',
+  'products.sort.name': 'Nom (A-Z)',
+  'products.sort.newest': 'Plus récents',
+  'products.sort.popular': 'Populaires',
+  'products.sort.price_asc': 'Prix croissant',
+  'products.sort.price_desc': 'Prix décroissant',
+  'products.per_page': '{n} par page',
+  'products.pagination.prev': 'Précédent',
+  'products.pagination.next': 'Suivant',
+
+  'product.badge.new': 'Nouveau',
+  'product.badge.subscription_short': 'Abo',
+  'product.badge.subscription': 'Abonnement',
+  'product.badge.featured': 'En vedette',
+  'product.badge.star': 'Star',
+
+  'product.not_found.title': 'Produit introuvable',
+  'product.not_found.description': 'Ce produit n\'existe pas ou a été retiré de la boutique.',
+  'product.back_to_shop': 'Retour à la boutique',
+  'product.breadcrumb_shop': 'Boutique',
+  'product.feature.instant': 'Instantané',
+  'product.feature.auto_delivery': 'Livraison auto',
+  'product.feature.secure': 'Sécurisé',
+  'product.feature.protected_payment': 'Paiement protégé',
+  'product.feature.support_247': 'Support continu',
+  'product.stock_suffix': 'en stock',
+  'product.servers_available': 'Serveurs disponibles',
+  'product.customize': 'Personnaliser',
+  'product.buy_one_month': 'Acheter 1 mois -',
+  'product.subscribe': 'S\'abonner -',
+  'product.subscription_note': 'L\'abonnement se renouvelle automatiquement. Annulable à tout moment.',
+  'product.add_to_cart': 'Ajouter au panier',
+  'product.toast.added_one_month': '{name} ajouté au panier (1 mois)',
+  'product.toast.added_subscription': '{name} ajouté au panier (abonnement)',
+  'product.toast.replaced_by_subscription': 'Panier remplacé par l\'abonnement {name}',
+  'product.toast.added_qty': '{name} x{qty} ajouté au panier',
+  'product.banner.checkout_success': 'Paiement effectué avec succès ! Votre commande sera livrée automatiquement.',
+  'product.banner.checkout_canceled': 'Paiement annulé. Vous pouvez réessayer à tout moment.',
+  'product.discount_suffix': '% de réduction',
+
+  'custom_fields.stat.hp': 'Points de vie du dino',
+  'custom_fields.stat.stam': 'Endurance du dino',
+  'custom_fields.stat.oxy': 'Oxygène du dino',
+  'custom_fields.stat.food': 'Nourriture du dino',
+  'custom_fields.stat.poids': 'Poids du dino',
+  'custom_fields.stat.damage': 'Dégâts du dino',
+  'custom_fields.stat.degat': 'Dégâts de l\'objet',
+  'custom_fields.stat.dura': 'Durabilité de l\'objet',
+  'custom_fields.rule.reduce_by': 'Réduisez de {n} points',
+  'custom_fields.rule.remaining_exact': 'Il vous reste {n} points à répartir',
+  'custom_fields.rule.remaining_range': '{n} points restants (min {min})',
+  'custom_fields.option_price_for': 'pour cette option',
+  'custom_fields.step_label': 'pas de {step}',
+  'custom_fields.text_placeholder': 'Entrez {name}...',
+
+  'countdown.label': 'Offre expire dans',
+  'countdown.unit_days': 'j',
+  'countdown.unit_hours': 'h',
+  'countdown.unit_minutes': 'm',
+  'countdown.unit_seconds': 's',
+
+  'promo.close_aria': 'Fermer la bannière',
+
+  'checkout.toast.accept_terms': 'Veuillez accepter les conditions relatives au droit de rétractation.',
+  'checkout.toast.shop_unavailable': 'Impossible de contacter la boutique. Veuillez réessayer.',
+  'checkout.toast.field_required': 'Le champ "{label}" est requis.',
+  'checkout.toast.rule_exact': '{product} - {rule} : la somme doit être exactement {max} (actuellement {total}).',
+  'checkout.toast.rule_range': '{product} - {rule} : la somme doit être entre {min} et {max} (actuellement {total}).',
+  'checkout.toast.generic_error': 'Une erreur est survenue. Veuillez réessayer.',
+  'checkout.toast.item_removed': '{name} retiré du panier',
+
+  'checkout.redirecting.title': 'Redirection vers le paiement',
+  'checkout.redirecting.body': 'Vous allez être redirigé vers la page de paiement sécurisée. Veuillez patienter...',
+  'checkout.redirecting.status': 'Redirection en cours...',
+  'checkout.trust.secure_payment': 'Paiement sécurisé',
+  'checkout.trust.instant_delivery': 'Livraison instantanée',
+  'checkout.trust.secure_encrypted': 'Paiement sécurisé et chiffré',
+  'checkout.trust.auto_instant': 'Livraison automatique instantanée',
+
+  'checkout.empty.title': 'Votre panier est vide',
+  'checkout.empty.description': 'Ajoutez des articles depuis la boutique pour passer commande.',
+  'checkout.empty.cta': 'Voir la boutique',
+  'checkout.back': 'Retour',
+  'checkout.breadcrumb_payment': 'Paiement',
+  'checkout.title': 'Finaliser la commande',
+  'checkout.section_cart': 'Votre panier',
+  'checkout.badge.subscription': 'Abonnement',
+  'checkout.badge.one_month': '1 mois',
+  'checkout.loading_info': 'Chargement des informations...',
+  'checkout.section_delivery_info': 'Informations de livraison',
+  'checkout.summary.title': 'Récapitulatif',
+  'checkout.summary.promo_note': 'Les codes promo et cartes cadeaux peuvent être appliqués sur la page de paiement.',
+  'checkout.terms.text': 'Conformément à l\'article L221-28 du Code de la consommation, le client renonce à son droit de rétractation dès l\'accès au contenu numérique. Aucun remboursement ne sera possible après activation, sauf défaut technique avéré.',
+  'checkout.button.redirecting': 'Redirection...',
+  'checkout.button.pay': 'Payer',
+
+  'checkout_success.title': 'Paiement confirmé !',
+  'checkout_success.subtitle': 'Merci pour votre achat. Votre commande a été validée avec succès.',
+  'checkout_success.delivery.title': 'Livraison en cours',
+  'checkout_success.delivery.body': 'Vos articles sont en cours de livraison sur le serveur sur lequel vous êtes connecté. Ils apparaîtront automatiquement dans votre inventaire.',
+  'checkout_success.timing.title': 'Délai de livraison',
+  'checkout_success.timing.body': 'Quelques instants après connexion au serveur',
+  'checkout_success.security.title': 'Transaction sécurisée',
+  'checkout_success.security.body': 'Votre paiement a été traité en toute sécurité',
+  'checkout_success.howto.title': 'Comment recevoir vos articles ?',
+  'checkout_success.howto.step1': 'Connectez-vous au serveur de jeu sur lequel vous jouez habituellement.',
+  'checkout_success.howto.step2': 'Vos articles seront automatiquement livrés dans votre inventaire en jeu.',
+  'checkout_success.howto.step3': 'Si vous ne recevez pas vos articles sous quelques minutes, reconnectez-vous au serveur.',
+  'checkout_success.back_to_shop': 'Retour à la boutique',
+
+  'checkout_canceled.title': 'Paiement annulé',
+  'checkout_canceled.subtitle': 'Votre commande n\'a pas été finalisée. Aucun montant n\'a été débité.',
+  'checkout_canceled.no_charge.title': 'Aucun prélèvement effectué',
+  'checkout_canceled.no_charge.body': 'Votre moyen de paiement n\'a pas été débité. Vous pouvez retenter votre achat à tout moment depuis votre panier.',
+  'checkout_canceled.retry.title': 'Réessayer',
+  'checkout_canceled.retry.body': 'Votre panier a été conservé',
+  'checkout_canceled.help.title': 'Besoin d\'aide ?',
+  'checkout_canceled.help.body': 'Contactez-nous sur Discord',
+  'checkout_canceled.reasons.title': 'Raisons possibles de l\'annulation',
+  'checkout_canceled.reasons.manual': 'Vous avez annulé le paiement manuellement depuis la page de paiement.',
+  'checkout_canceled.reasons.declined': 'Votre moyen de paiement a été refusé par votre banque.',
+  'checkout_canceled.reasons.expired': 'La session de paiement a expiré après un délai d\'inactivité.',
+  'checkout_canceled.return_to_cart': 'Retourner au panier',
+  'checkout_canceled.continue_shopping': 'Continuer mes achats',
+};
+
+const en: Dict = {
+  'common.loading': 'Loading...',
+  'common.back': 'Back',
+  'common.total': 'Total',
+  'common.subtotal': 'Subtotal:',
+  'common.options': 'Options',
+  'common.base_price_prefix': 'Base price:',
+  'common.base_short': 'Base:',
+  'common.plus_options': '+ Options:',
+  'common.required': 'Required',
+  'common.yes': 'Yes',
+  'common.no': 'No',
+
+  'periodicity.month': 'month',
+  'periodicity.months': 'months',
+  'periodicity.week': 'week',
+  'periodicity.weeks': 'weeks',
+  'periodicity.day': 'day',
+  'periodicity.days': 'days',
+  'periodicity.year': 'year',
+  'periodicity.years': 'years',
+
+  'lang.switch': 'Language',
+  'lang.fr': 'Français',
+  'lang.en': 'English',
+
+  'header.home': 'Home',
+  'header.all_products': 'All products',
+  'header.view_full_catalog': 'View full catalog',
+  'header.login': 'Log in',
+  'header.theme_light': 'Light mode',
+  'header.theme_dark': 'Dark mode',
+  'header.cart': 'Cart',
+  'header.categories': 'Categories',
+
+  'footer.navigation': 'Navigation',
+  'footer.home': 'Home',
+  'footer.shop': 'Shop',
+  'footer.secure_payment': 'Secure payment',
+  'footer.secure_payment_desc': 'All payments are processed securely via Tip4Serv.',
+  'footer.rights_reserved': 'All rights reserved.',
+  'footer.default_description': 'The official store for your ARK: Survival Ascended products. Instant delivery to your server.',
+
+  'hero.badge_fallback': 'Instant delivery to your server',
+  'hero.welcome_prefix': 'Welcome to',
+  'hero.title_fallback_1': 'PC/Console Store',
+  'hero.title_fallback_2': 'for ARK FRANCE servers',
+  'hero.cta_explore': 'Explore the store',
+  'hero.stat_products': 'Products',
+  'hero.stat_delivery': 'Delivery',
+  'hero.stat_secure': 'Secure',
+  'hero.description_suffix': 'Buy safely and receive your items instantly in-game.',
+  'hero.description_fallback': 'Dinos, kits, VIP ranks and much more. Buy safely and receive your items instantly in-game.',
+
+  'home.categories.title': 'Browse by category',
+  'home.categories.subtitle': 'Find exactly what you need to dominate ARK Ascended',
+  'home.categories.view_products': 'View products',
+
+  'home.featured.title': 'Featured products',
+  'home.featured.subtitle': 'The best items handpicked to upgrade your gaming experience',
+  'home.featured.view_all': 'View all',
+
+  'home.latest.title': 'Latest products',
+  'home.latest.subtitle': 'Discover our freshly added releases',
+
+  'cart.title': 'Cart',
+  'cart.items_singular': 'item',
+  'cart.items_plural': 'items',
+  'cart.clear_tooltip': 'Clear cart',
+  'cart.empty.title': 'Cart is empty',
+  'cart.empty.description': 'Browse the shop and add some items.',
+  'cart.empty.cta': 'View the shop',
+  'cart.toast.cleared': 'Cart emptied',
+  'cart.toast.item_removed': '{name} removed from cart',
+  'cart.toast.item_added': '{name} added to cart',
+  'cart.toast.subscription_conflict': 'A subscription is already in the cart. Empty the cart to add this product.',
+  'cart.badge.subscription_short': 'Sub',
+  'cart.badge.one_month': '1 month',
+  'cart.price.base_label': 'base',
+  'cart.price.options_label': 'options',
+  'cart.options.hide': 'Hide options',
+  'cart.options.edit': 'Edit options',
+  'cart.checkout_button': 'Checkout',
+  'cart.discount.applied': 'applied!',
+  'cart.discount.unlock': 'Unlock discounts',
+  'cart.discount.remaining_prefix': 'Only',
+  'cart.discount.remaining_suffix': 'more for',
+  'cart.discount.max_reached': 'Max discount reached',
+
+  'crosssell.title': 'You might also like',
+  'crosssell.add_tooltip': 'Add to cart',
+
+  'products.grid.empty_title': 'No products found in this category.',
+  'products.grid.empty_help': 'Try adjusting your filters or search.',
+
+  'products.page.title_all': 'All products',
+  'products.page.subtitle_category': 'Browse products in the {name} category',
+  'products.page.subtitle_all': 'Discover our full catalog for ARK Ascended',
+  'products.page.found_singular': 'product found',
+  'products.page.found_plural': 'products found',
+  'products.page.sidebar_categories': 'Categories',
+  'products.page.search_placeholder': 'Search for a product...',
+  'products.sort.name': 'Name (A-Z)',
+  'products.sort.newest': 'Newest',
+  'products.sort.popular': 'Popular',
+  'products.sort.price_asc': 'Price: low to high',
+  'products.sort.price_desc': 'Price: high to low',
+  'products.per_page': '{n} per page',
+  'products.pagination.prev': 'Previous',
+  'products.pagination.next': 'Next',
+
+  'product.badge.new': 'New',
+  'product.badge.subscription_short': 'Sub',
+  'product.badge.subscription': 'Subscription',
+  'product.badge.featured': 'Featured',
+  'product.badge.star': 'Star',
+
+  'product.not_found.title': 'Product not found',
+  'product.not_found.description': 'This product does not exist or has been removed from the shop.',
+  'product.back_to_shop': 'Back to shop',
+  'product.breadcrumb_shop': 'Shop',
+  'product.feature.instant': 'Instant',
+  'product.feature.auto_delivery': 'Auto delivery',
+  'product.feature.secure': 'Secure',
+  'product.feature.protected_payment': 'Protected payment',
+  'product.feature.support_247': '24/7 support',
+  'product.stock_suffix': 'in stock',
+  'product.servers_available': 'Available servers',
+  'product.customize': 'Customize',
+  'product.buy_one_month': 'Buy 1 month -',
+  'product.subscribe': 'Subscribe -',
+  'product.subscription_note': 'The subscription renews automatically. Cancel anytime.',
+  'product.add_to_cart': 'Add to cart',
+  'product.toast.added_one_month': '{name} added to cart (1 month)',
+  'product.toast.added_subscription': '{name} added to cart (subscription)',
+  'product.toast.replaced_by_subscription': 'Cart replaced by {name} subscription',
+  'product.toast.added_qty': '{name} x{qty} added to cart',
+  'product.banner.checkout_success': 'Payment successful! Your order will be delivered automatically.',
+  'product.banner.checkout_canceled': 'Payment canceled. You can try again anytime.',
+  'product.discount_suffix': '% off',
+
+  'custom_fields.stat.hp': 'Dino hit points',
+  'custom_fields.stat.stam': 'Dino stamina',
+  'custom_fields.stat.oxy': 'Dino oxygen',
+  'custom_fields.stat.food': 'Dino food',
+  'custom_fields.stat.poids': 'Dino weight',
+  'custom_fields.stat.damage': 'Dino damage',
+  'custom_fields.stat.degat': 'Item damage',
+  'custom_fields.stat.dura': 'Item durability',
+  'custom_fields.rule.reduce_by': 'Reduce by {n} points',
+  'custom_fields.rule.remaining_exact': 'You have {n} points left to distribute',
+  'custom_fields.rule.remaining_range': '{n} points remaining (min {min})',
+  'custom_fields.option_price_for': 'for this option',
+  'custom_fields.step_label': 'step of {step}',
+  'custom_fields.text_placeholder': 'Enter {name}...',
+
+  'countdown.label': 'Offer expires in',
+  'countdown.unit_days': 'd',
+  'countdown.unit_hours': 'h',
+  'countdown.unit_minutes': 'm',
+  'countdown.unit_seconds': 's',
+
+  'promo.close_aria': 'Close banner',
+
+  'checkout.toast.accept_terms': 'Please accept the withdrawal rights terms.',
+  'checkout.toast.shop_unavailable': 'Unable to reach the shop. Please try again.',
+  'checkout.toast.field_required': 'The "{label}" field is required.',
+  'checkout.toast.rule_exact': '{product} - {rule}: the sum must be exactly {max} (currently {total}).',
+  'checkout.toast.rule_range': '{product} - {rule}: the sum must be between {min} and {max} (currently {total}).',
+  'checkout.toast.generic_error': 'An error occurred. Please try again.',
+  'checkout.toast.item_removed': '{name} removed from cart',
+
+  'checkout.redirecting.title': 'Redirecting to payment',
+  'checkout.redirecting.body': 'You are being redirected to the secure payment page. Please wait...',
+  'checkout.redirecting.status': 'Redirecting...',
+  'checkout.trust.secure_payment': 'Secure payment',
+  'checkout.trust.instant_delivery': 'Instant delivery',
+  'checkout.trust.secure_encrypted': 'Secure and encrypted payment',
+  'checkout.trust.auto_instant': 'Automatic instant delivery',
+
+  'checkout.empty.title': 'Your cart is empty',
+  'checkout.empty.description': 'Add items from the shop to place an order.',
+  'checkout.empty.cta': 'View the shop',
+  'checkout.back': 'Back',
+  'checkout.breadcrumb_payment': 'Payment',
+  'checkout.title': 'Complete your order',
+  'checkout.section_cart': 'Your cart',
+  'checkout.badge.subscription': 'Subscription',
+  'checkout.badge.one_month': '1 month',
+  'checkout.loading_info': 'Loading information...',
+  'checkout.section_delivery_info': 'Delivery information',
+  'checkout.summary.title': 'Summary',
+  'checkout.summary.promo_note': 'Promo codes and gift cards can be applied on the payment page.',
+  'checkout.terms.text': 'In accordance with Article L221-28 of the French Consumer Code, the customer waives their right of withdrawal upon accessing the digital content. No refund will be possible after activation, except for a proven technical defect.',
+  'checkout.button.redirecting': 'Redirecting...',
+  'checkout.button.pay': 'Pay',
+
+  'checkout_success.title': 'Payment confirmed!',
+  'checkout_success.subtitle': 'Thank you for your purchase. Your order has been successfully validated.',
+  'checkout_success.delivery.title': 'Delivery in progress',
+  'checkout_success.delivery.body': 'Your items are being delivered to the server you are connected to. They will automatically appear in your inventory.',
+  'checkout_success.timing.title': 'Delivery time',
+  'checkout_success.timing.body': 'A few moments after connecting to the server',
+  'checkout_success.security.title': 'Secure transaction',
+  'checkout_success.security.body': 'Your payment was processed securely',
+  'checkout_success.howto.title': 'How to receive your items?',
+  'checkout_success.howto.step1': 'Log in to the game server you usually play on.',
+  'checkout_success.howto.step2': 'Your items will be automatically delivered to your in-game inventory.',
+  'checkout_success.howto.step3': 'If you don\'t receive your items within a few minutes, reconnect to the server.',
+  'checkout_success.back_to_shop': 'Back to shop',
+
+  'checkout_canceled.title': 'Payment canceled',
+  'checkout_canceled.subtitle': 'Your order was not completed. No charge was made.',
+  'checkout_canceled.no_charge.title': 'No charge made',
+  'checkout_canceled.no_charge.body': 'Your payment method was not charged. You can retry your purchase at any time from your cart.',
+  'checkout_canceled.retry.title': 'Try again',
+  'checkout_canceled.retry.body': 'Your cart has been saved',
+  'checkout_canceled.help.title': 'Need help?',
+  'checkout_canceled.help.body': 'Contact us on Discord',
+  'checkout_canceled.reasons.title': 'Possible reasons for cancellation',
+  'checkout_canceled.reasons.manual': 'You manually canceled the payment from the payment page.',
+  'checkout_canceled.reasons.declined': 'Your payment method was declined by your bank.',
+  'checkout_canceled.reasons.expired': 'The payment session expired after a period of inactivity.',
+  'checkout_canceled.return_to_cart': 'Back to cart',
+  'checkout_canceled.continue_shopping': 'Continue shopping',
+};
+
+const dictionaries: Record<Language, Dict> = { fr, en };
+
+type Ctx = {
+  lang: Language;
+  setLang: (l: Language) => void;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+};
+
+const LanguageContext = createContext<Ctx | undefined>(undefined);
+
+const STORAGE_KEY = 'app.language';
+
+function detectInitial(): Language {
+  if (typeof window === 'undefined') return 'fr';
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (stored === 'fr' || stored === 'en') return stored;
+  const nav = window.navigator?.language?.toLowerCase() || '';
+  if (nav.startsWith('en')) return 'en';
+  return 'fr';
+}
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Language>(() => detectInitial());
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, lang);
+      document.documentElement.lang = lang;
+    } catch {
+      // ignore
+    }
+  }, [lang]);
+
+  const setLang = (l: Language) => setLangState(l);
+
+  const t = (key: string, vars?: Record<string, string | number>) => {
+    const dict = dictionaries[lang];
+    let template = dict[key];
+    if (template === undefined) template = dictionaries.fr[key] ?? key;
+    if (!vars) return template;
+    return template.replace(/\{(\w+)\}/g, (_m, k) => {
+      const v = vars[k];
+      return v === undefined ? `{${k}}` : String(v);
+    });
+  };
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const ctx = useContext(LanguageContext);
+  if (!ctx) throw new Error('useLanguage must be used within LanguageProvider');
+  return ctx;
+}
+
+export function useT() {
+  return useLanguage().t;
+}

@@ -10,6 +10,7 @@ import { getProductBySlug } from '../lib/api';
 import { fallbackProducts } from '../data/fallback';
 import { useCart } from '../lib/cart';
 import { useToast } from '../lib/toast';
+import { useT } from '../lib/i18n';
 import type { Product, PurchaseType } from '../lib/types';
 import { getCustomFieldDefaults, translatePeriodicity } from '../lib/utils';
 import { computeExtrasPrice } from '../lib/pricing';
@@ -24,6 +25,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const t = useT();
   const checkoutStatus = searchParams.get('checkout');
 
   useEffect(() => {
@@ -106,16 +108,16 @@ export default function ProductDetailPage() {
     return (
       <div className="pt-32 text-center">
         <div className="max-w-md mx-auto px-4">
-          <h2 className="text-2xl font-bold text-heading mb-4">Produit introuvable</h2>
+          <h2 className="text-2xl font-bold text-heading mb-4">{t('product.not_found.title')}</h2>
           <p className="text-volcanic-400 mb-8">
-            Ce produit n'existe pas ou a été retiré de la boutique.
+            {t('product.not_found.description')}
           </p>
           <Link
             to="/products"
             className="inline-flex items-center gap-2 px-6 py-3 bg-ark-600 hover:bg-ark-500 text-white font-semibold rounded-xl transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à la boutique
+            {t('product.back_to_shop')}
           </Link>
         </div>
       </div>
@@ -140,7 +142,7 @@ export default function ProductDetailPage() {
           <div className="mb-6 flex items-center gap-3 p-4 bg-ark-600/10 border border-ark-600/20 rounded-xl animate-fade-in">
             <CheckCircle className="w-5 h-5 text-ark-500 shrink-0" />
             <p className="text-ark-800 dark:text-ark-300 flex-1">
-              Paiement effectué avec succès ! Votre commande sera livrée automatiquement.
+              {t('product.banner.checkout_success')}
             </p>
             <button onClick={dismissCheckoutStatus} className="text-volcanic-400 hover:text-heading transition-colors">
               <XCircle className="w-4 h-4" />
@@ -152,7 +154,7 @@ export default function ProductDetailPage() {
           <div className="mb-6 flex items-center gap-3 p-4 bg-sand-500/10 border border-sand-500/20 rounded-xl animate-fade-in">
             <XCircle className="w-5 h-5 text-sand-400 shrink-0" />
             <p className="text-sand-800 dark:text-sand-300 flex-1">
-              Paiement annulé. Vous pouvez réessayer à tout moment.
+              {t('product.banner.checkout_canceled')}
             </p>
             <button onClick={dismissCheckoutStatus} className="text-volcanic-400 hover:text-heading transition-colors">
               <XCircle className="w-4 h-4" />
@@ -166,7 +168,7 @@ export default function ProductDetailPage() {
             className="inline-flex items-center gap-2 hover:text-heading transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Boutique
+            {t('product.breadcrumb_shop')}
           </Link>
           {product.category?.name && (
             <>
@@ -225,15 +227,15 @@ export default function ProductDetailPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
               {product.percent_off && product.percent_off > 0 && (
-                <Badge variant="discount">-{product.percent_off}% de réduction</Badge>
+                <Badge variant="discount">-{product.percent_off}{t('product.discount_suffix')}</Badge>
               )}
               {product.subscription && (
                 <Badge variant="subscription">
                   <RefreshCw className="w-3 h-3 mr-1" />
-                  Abonnement
+                  {t('product.badge.subscription')}
                 </Badge>
               )}
-              {product.featured && <Badge variant="featured">En vedette</Badge>}
+              {product.featured && <Badge variant="featured">{t('product.badge.featured')}</Badge>}
             </div>
 
             <h1 className="text-3xl lg:text-4xl font-bold text-heading">{product.name}</h1>
@@ -257,7 +259,7 @@ export default function ProductDetailPage() {
               </div>
               {extrasPrice > 0 && (
                 <div className="text-sm text-volcanic-400">
-                  Prix de base: {product.price.toFixed(2)} € + Options: {extrasPrice.toFixed(2)} €
+                  {t('common.base_price_prefix')} {product.price.toFixed(2)} € {t('common.plus_options')} {extrasPrice.toFixed(2)} €
                 </div>
               )}
               {product.discount_end && (product.discount_end < 1e12 ? product.discount_end * 1000 : product.discount_end) > Date.now() && (
@@ -280,8 +282,8 @@ export default function ProductDetailPage() {
                   <Zap className="w-5 h-5 text-ark-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-heading">Instantané</div>
-                  <div className="text-xs text-volcanic-400">Livraison auto</div>
+                  <div className="text-sm font-medium text-heading">{t('product.feature.instant')}</div>
+                  <div className="text-xs text-volcanic-400">{t('product.feature.auto_delivery')}</div>
                 </div>
               </div>
               <div className="glass-card p-4 flex items-center gap-3 group hover:border-ark-600/30 transition-all duration-200">
@@ -289,8 +291,8 @@ export default function ProductDetailPage() {
                   <Shield className="w-5 h-5 text-ark-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-heading">Sécurisé</div>
-                  <div className="text-xs text-volcanic-400">Paiement protégé</div>
+                  <div className="text-sm font-medium text-heading">{t('product.feature.secure')}</div>
+                  <div className="text-xs text-volcanic-400">{t('product.feature.protected_payment')}</div>
                 </div>
               </div>
               <div className="glass-card p-4 flex items-center gap-3 group hover:border-ark-600/30 transition-all duration-200">
@@ -299,21 +301,21 @@ export default function ProductDetailPage() {
                 </div>
                 <div>
                   <div className="text-sm font-medium text-heading">24/7</div>
-                  <div className="text-xs text-volcanic-400">Support continu</div>
+                  <div className="text-xs text-volcanic-400">{t('product.feature.support_247')}</div>
                 </div>
               </div>
             </div>
 
             {product.enable_stock && product.stock !== undefined && (
               <div className="text-sm text-volcanic-400">
-                <span className="text-heading font-medium">{product.stock}</span> en stock
+                <span className="text-heading font-medium">{product.stock}</span> {t('product.stock_suffix')}
               </div>
             )}
 
             {product.server_options && product.server_options.length > 0 && (
               <div className="glass-card p-5">
                 <h3 className="text-sm font-semibold text-heading mb-3 uppercase tracking-wider">
-                  Serveurs disponibles
+                  {t('product.servers_available')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {product.server_options.map((srv) => (
@@ -333,7 +335,7 @@ export default function ProductDetailPage() {
                 <div className="flex items-center gap-2 mb-5">
                   <Settings2 className="w-4 h-4 text-ark-500" />
                   <h3 className="text-sm font-semibold text-heading uppercase tracking-wider">
-                    Personnaliser
+                    {t('product.customize')}
                   </h3>
                 </div>
                 <CustomFieldsForm
@@ -344,7 +346,7 @@ export default function ProductDetailPage() {
                 />
                 {extrasPrice > 0 && (
                   <div className="mt-4 pt-3 border-t border-volcanic-700/40 flex items-center justify-between">
-                    <span className="text-xs text-volcanic-400">Options</span>
+                    <span className="text-xs text-volcanic-400">{t('common.options')}</span>
                     <span className="text-sm font-semibold text-ark-400">
                       +{extrasPrice.toFixed(2)} &euro;
                     </span>
@@ -365,15 +367,15 @@ export default function ProductDetailPage() {
                       'addtocart'
                     );
                     if (!result.ok) {
-                      addToast('Un abonnement est deja dans le panier. Videz le panier pour ajouter ce produit.', 'error');
+                      addToast(t('cart.toast.subscription_conflict'), 'error');
                       return;
                     }
-                    addToast(`${product.name} ajouté au panier (1 mois)`, 'success');
+                    addToast(t('product.toast.added_one_month', { name: product.name }), 'success');
                   }}
                   className="w-full py-4 text-base rounded-xl font-semibold flex items-center justify-center gap-2 border-2 border-ark-600/40 text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 hover:border-ark-500/60 transition-all duration-200"
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  Acheter 1 mois - {(product.price + extrasPrice).toFixed(2)} &euro;
+                  {t('product.buy_one_month')} {(product.price + extrasPrice).toFixed(2)} &euro;
                 </button>
                 <button
                   onClick={() => {
@@ -385,21 +387,21 @@ export default function ProductDetailPage() {
                       'subscribe'
                     );
                     if (result.ok && result.replaced) {
-                      addToast(`Panier remplacé par l'abonnement ${product.name}`, 'info');
+                      addToast(t('product.toast.replaced_by_subscription', { name: product.name }), 'info');
                     } else {
-                      addToast(`${product.name} ajouté au panier (abonnement)`, 'success');
+                      addToast(t('product.toast.added_subscription', { name: product.name }), 'success');
                     }
                   }}
                   className="btn-primary w-full py-4 text-base"
                 >
                   <RefreshCw className="w-5 h-5" />
-                  S'abonner - {(product.price + extrasPrice).toFixed(2)} &euro;
+                  {t('product.subscribe')} {(product.price + extrasPrice).toFixed(2)} &euro;
                   <span className="text-sm opacity-80">
                     /{product.period_num && product.period_num > 1 ? `${product.period_num} ` : ''}{product.duration_periodicity ? translatePeriodicity(product.duration_periodicity) : 'mois'}
                   </span>
                 </button>
                 <p className="text-xs text-volcanic-500 text-center">
-                  L'abonnement se renouvelle automatiquement. Annulable a tout moment.
+                  {t('product.subscription_note')}
                 </p>
               </div>
             ) : (
@@ -433,16 +435,16 @@ export default function ProductDetailPage() {
                       quantity
                     );
                     if (!result.ok) {
-                      addToast('Un abonnement est deja dans le panier. Videz le panier pour ajouter ce produit.', 'error');
+                      addToast(t('cart.toast.subscription_conflict'), 'error');
                       return;
                     }
-                    addToast(`${product.name} x${quantity} ajouté au panier`, 'success');
+                    addToast(t('product.toast.added_qty', { name: product.name, qty: quantity }), 'success');
                     setQuantity(1);
                   }}
                   className="btn-primary flex-1 py-4 text-base"
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  Ajouter au panier
+                  {t('product.add_to_cart')}
                 </button>
               </div>
             )}

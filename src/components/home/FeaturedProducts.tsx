@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 import type { Product } from '../../lib/types';
 import ProductCard from '../products/ProductCard';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   products: Product[];
 }
 
 export default function FeaturedProducts({ products }: Props) {
+  const t = useT();
   const featured = products.filter((p) => p.featured).slice(0, 4);
   if (featured.length === 0) return null;
 
@@ -22,10 +24,10 @@ export default function FeaturedProducts({ products }: Props) {
             </div>
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold text-heading">
-                Produits en vedette
+                {t('home.featured.title')}
               </h2>
               <p className="text-volcanic-400 mt-1 text-lg max-w-xl">
-                Les meilleurs articles selectionnes pour ameliorer votre experience de jeu
+                {t('home.featured.subtitle')}
               </p>
             </div>
           </div>
@@ -33,7 +35,7 @@ export default function FeaturedProducts({ products }: Props) {
             to="/products"
             className="group inline-flex items-center gap-2 px-4 py-2 text-ark-500 hover:text-ark-400 font-medium transition-all duration-200 rounded-lg hover:bg-ark-500/5 shrink-0"
           >
-            Voir tout
+            {t('home.featured.view_all')}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
         </div>

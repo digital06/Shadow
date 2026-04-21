@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Megaphone } from 'lucide-react';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   message: string;
@@ -15,6 +16,7 @@ const variants = {
 
 export default function PromoBanner({ message, link, variant = 'info' }: Props) {
   const [isVisible, setIsVisible] = useState(true);
+  const t = useT();
 
   if (!isVisible) return null;
 
@@ -29,7 +31,7 @@ export default function PromoBanner({ message, link, variant = 'info' }: Props) 
           <button
             onClick={() => setIsVisible(false)}
             className="p-1.5 hover:bg-white/10 rounded-lg transition-colors duration-200 flex-shrink-0"
-            aria-label="Fermer la banniere"
+            aria-label={t('promo.close_aria')}
           >
             <X className="w-4 h-4" />
           </button>

@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Star, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Star, Sparkles, Loader as Loader2 } from 'lucide-react';
 import { getAllProducts, getProductBySlug } from '../../lib/api';
 import { fallbackProducts } from '../../data/fallback';
 import { useCart, type CartItem } from '../../lib/cart';
 import { useToast } from '../../lib/toast';
 import type { Product } from '../../lib/types';
 import { getCustomFieldDefaults } from '../../lib/utils';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   cartItems: CartItem[];
@@ -18,6 +19,7 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
   const [loading, setLoading] = useState(true);
   const { addItem, hasSubscription } = useCart();
   const { addToast } = useToast();
+  const t = useT();
 
   useEffect(() => {
     let cancelled = false;
@@ -72,20 +74,20 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
         : {};
       const result = addItem(fullProduct, defaults, fullProduct.server_options?.[0]?.id);
       if (!result.ok) {
-        addToast('Un abonnement est deja dans le panier. Videz le panier pour ajouter ce produit.', 'error');
+        addToast(t('cart.toast.subscription_conflict'), 'error');
         return;
       }
-      addToast(`${fullProduct.name} ajouté au panier`, 'success');
+      addToast(t('cart.toast.item_added', { name: fullProduct.name }), 'success');
     } catch {
       const defaults = product.custom_fields?.length
         ? getCustomFieldDefaults(product.custom_fields)
         : {};
       const result = addItem(product, defaults);
       if (!result.ok) {
-        addToast('Un abonnement est deja dans le panier. Videz le panier pour ajouter ce produit.', 'error');
+        addToast(t('cart.toast.subscription_conflict'), 'error');
         return;
       }
-      addToast(`${product.name} ajouté au panier`, 'success');
+      addToast(t('cart.toast.item_added', { name: product.name }), 'success');
     } finally {
       setAddingIds((prev) => {
         const next = new Set(prev);
@@ -102,7 +104,7 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
       <div className="px-4 pt-4 pb-2">
         <h3 className="text-sm font-semibold text-heading flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-ark-500" />
-          Vous pourriez aussi aimer
+          {t('crosssell.title')}
         </h3>
       </div>
       <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-thin">
@@ -167,7 +169,7 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
                     onClick={() => handleQuickAdd(product)}
                     disabled={addingIds.has(product.id)}
                     className="w-6 h-6 flex items-center justify-center rounded-md bg-ark-600/20 text-ark-500 hover:bg-ark-600 hover:text-white disabled:opacity-50 disabled:cursor-wait transition-all duration-200"
-                    title="Ajouter au panier"
+                    title={t('crosssell.add_tooltip')}
                   >
                     {addingIds.has(product.id) ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />

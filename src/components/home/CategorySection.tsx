@@ -3,12 +3,14 @@ import { ArrowRight, LayoutGrid } from 'lucide-react';
 import type { Category } from '../../lib/types';
 import { getCategoryIcon } from '../../lib/categoryIcons';
 import { stripHtml } from '../../lib/utils';
+import { useT } from '../../lib/i18n';
 
 interface Props {
   categories: Category[];
 }
 
 export default function CategorySection({ categories }: Props) {
+  const t = useT();
   if (categories.length === 0) return null;
 
   return (
@@ -23,10 +25,10 @@ export default function CategorySection({ categories }: Props) {
           </div>
           <div>
             <h2 className="text-3xl lg:text-4xl font-bold text-heading">
-              Parcourir par categorie
+              {t('home.categories.title')}
             </h2>
             <p className="text-volcanic-400 mt-1 text-lg max-w-xl">
-              Trouvez exactement ce dont vous avez besoin pour dominer sur ARK Ascended
+              {t('home.categories.subtitle')}
             </p>
           </div>
         </div>
@@ -72,7 +74,7 @@ export default function CategorySection({ categories }: Props) {
                     </p>
                   )}
                   <span className="inline-flex items-center gap-1 text-sm text-ark-500 font-medium group-hover:gap-2.5 transition-all duration-300">
-                    Voir les produits
+                    {t('home.categories.view_products')}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </div>
