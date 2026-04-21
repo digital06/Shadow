@@ -8,13 +8,61 @@ import type {
 } from './types';
 import { decodeProductData, decodeHtmlEntities } from './utils';
 
-const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tip4serv-proxy`;
+const TIP4SERV_DIRECT_KEY = import.meta.env.VITE_TIP4SERV_API_KEY as string | undefined;
+const TIP4SERV_BASE = 'https://api.tip4serv.com/v1';
+const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tip4serv-proxy`;
+const USE_DIRECT = Boolean(TIP4SERV_DIRECT_KEY && TIP4SERV_DIRECT_KEY.length > 0);
+const API_URL = PROXY_URL;
 
 const headers = {
   'Content-Type': 'application/json',
 };
 
+function buildDirectGet(params: Record<string, string>): string | null {
+  const action = params.action;
+  const page = params.page || '1';
+  const limit = params.limit || '50';
+  switch (action) {
+    case 'products': {
+      let path = `/store/products?page=${page}&max_page=${limit}&details=true&only_enabled=true`;
+      if (params.category) path += `&category=${params.category}`;
+      return TIP4SERV_BASE + path;
+    }
+    case 'categories': {
+      let path = `/store/categories?page=${page}&max_page=${limit}`;
+      if (params.parent) path += `&parent=${params.parent}`;
+      return TIP4SERV_BASE + path;
+    }
+    case 'product': {
+      const id = params.slug || params.id;
+      return `${TIP4SERV_BASE}/store/product/${id}?details=true`;
+    }
+    case 'store':
+      return `${TIP4SERV_BASE}/store/whoami`;
+    case 'checkout-identifiers':
+      return `${TIP4SERV_BASE}/store/checkout/identifiers?store=${params.store}&products=${params.products}`;
+    case 'servers':
+      return `${TIP4SERV_BASE}/store/servers?page=${page}&max_page=${limit}`;
+    default:
+      return null;
+  }
+}
+
 async function fetchApi<T>(params: Record<string, string>): Promise<T> {
+  if (USE_DIRECT) {
+    const url = buildDirectGet(params);
+    if (url) {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${TIP4SERV_DIRECT_KEY}`, Accept: 'application/json' },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = err?.error?.message || err?.error || err?.message || `API error: ${res.status}`;
+        throw new Error(msg);
+      }
+      return res.json();
+    }
+  }
   const searchParams = new URLSearchParams(params);
   const res = await fetch(`${API_URL}?${searchParams}`, { headers });
   if (!res.ok) {
@@ -201,6 +249,24 @@ export async function createCheckout(
   storeId: number,
   body: CheckoutBody
 ): Promise<CheckoutResponse> {
+  if (USE_DIRECT) {
+    const res = await fetch(`${TIP4SERV_BASE}/store/checkout?store=${storeId}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${TIP4SERV_DIRECT_KEY}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err?.error?.message || err?.error || err?.message || `API error: ${res.status}`;
+      throw new Error(msg);
+    }
+    return res.json();
+  }
+
   const searchParams = new URLSearchParams({
     action: 'checkout',
     store: String(storeId),

@@ -1,71 +1,60 @@
 # Guide de configuration (revente du site)
 
-Ce site utilise **Supabase** comme backend et l'API **Tip4Serv** pour la boutique et les paiements. Pour vendre le site, l'acheteur doit uniquement changer **2 choses** : sa clé API Tip4Serv et (optionnellement) son projet Supabase.
+Vous avez **deux modes** au choix :
+
+| Mode | Avantage | Inconvénient |
+|------|----------|--------------|
+| **A. Direct (.env)** | Aucune base de données, 1 seule variable à changer | La clé API est visible dans le JS public du site |
+| **B. Proxy Supabase** | Clé API cachée côté serveur (sécurisé) | Nécessite un projet Supabase |
 
 ---
 
-## 1. Clé API Tip4Serv (obligatoire)
+## Mode A — Direct via `.env` (le plus simple)
 
-La clé API Tip4Serv est **un secret serveur** : elle ne doit JAMAIS apparaître dans un fichier du dépôt ni dans le frontend (sinon n'importe quel visiteur peut la copier).
+1. Ouvrir le fichier `.env` à la racine du projet
+2. Renseigner votre clé Tip4Serv :
 
-Elle est stockée dans les **secrets des Edge Functions Supabase** sous le nom `TIP4SERV_API_KEY`.
-
-### Pour changer la clé
-
-**Option A — Tableau de bord Supabase (le plus simple)**
-
-1. Ouvrir le projet Supabase : https://supabase.com/dashboard
-2. Aller dans `Edge Functions` -> `Secrets`
-3. Modifier la valeur de `TIP4SERV_API_KEY`
-4. Sauvegarder — la prise en compte est immédiate
-
-**Option B — CLI Supabase**
-
-```bash
-supabase secrets set TIP4SERV_API_KEY=votre_nouvelle_cle --project-ref <project-ref>
+```env
+VITE_TIP4SERV_API_KEY=votre_cle_tip4serv_ici
 ```
 
-Aucun redéploiement du site n'est nécessaire : les Edge Functions lisent la variable d'environnement à chaque requête.
+3. Relancer le build (`npm run build`) puis redéployer le site
+
+C'est tout. Le site appelle directement `api.tip4serv.com` depuis le navigateur. Vous n'avez **plus besoin** de Supabase pour la boutique.
+
+### Avertissement de sécurité
+
+Tout ce qui commence par `VITE_` est **inclus dans le bundle JavaScript public**. N'importe quel visiteur peut ouvrir l'inspecteur du navigateur et copier la clé. Si la clé fuite, l'attaquant peut consulter votre catalogue, créer des sessions de paiement, etc. Ne choisissez ce mode que si vous acceptez ce risque (par exemple si vos restrictions Tip4Serv côté serveur le rendent acceptable).
 
 ---
 
-## 2. Projet Supabase (si l'acheteur utilise le sien)
+## Mode B — Proxy Supabase (sécurisé)
 
-Si l'acheteur veut son propre projet Supabase :
-
-1. Créer un projet sur https://supabase.com
-2. Récupérer `Project URL` et `anon public key` dans `Project Settings` -> `API`
-3. Mettre à jour le fichier `.env` à la racine :
+1. Laisser `VITE_TIP4SERV_API_KEY` **vide** dans `.env`
+2. Configurer Supabase :
 
 ```env
 VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
 ```
 
-4. Appliquer les migrations présentes dans `supabase/migrations/`
-5. Déployer les Edge Functions présentes dans `supabase/functions/` (`tip4serv-proxy`, `og-product`, `rcon-players`)
-6. Définir le secret `TIP4SERV_API_KEY` (voir section 1)
+3. Définir le secret `TIP4SERV_API_KEY` côté serveur :
+
+   - Tableau de bord Supabase -> `Edge Functions` -> `Secrets`, ou
+   - CLI : `supabase secrets set TIP4SERV_API_KEY=... --project-ref <ref>`
+
+4. Déployer les Edge Functions du dossier `supabase/functions/`
+
+Le frontend appelle alors l'Edge Function `tip4serv-proxy`, qui ajoute la clé côté serveur. La clé n'est jamais exposée au navigateur.
 
 ---
 
-## 3. Personnalisation de marque (optionnel)
+## Personnalisation de marque
 
-Le nom, le logo, la description et les liens de menu sont lus depuis **Tip4Serv** (via `action=store`). L'acheteur peut les modifier directement dans son tableau de bord Tip4Serv sans toucher au code.
+Le nom, le logo, la description et les liens de menu sont tirés automatiquement de votre compte Tip4Serv. Aucun changement de code nécessaire.
 
-Pour les ajustements purement visuels (couleurs, polices) :
+Pour les ajustements visuels :
 
 - Palette : `tailwind.config.js`
 - Favicon / OG image : `public/`
 - Image hero : `public/hytalehero.jpg`
-
----
-
-## Résumé pour une revente
-
-1. Fournir le code source
-2. L'acheteur crée son projet Supabase (ou réutilise le mien si cédé)
-3. L'acheteur configure `TIP4SERV_API_KEY` dans les secrets Edge Functions
-4. L'acheteur met à jour `.env` si projet Supabase différent
-5. Déploiement front (Vercel / Netlify / etc.)
-
-Le site est prêt à fonctionner avec la boutique de l'acheteur.
