@@ -8,7 +8,7 @@ import type {
 } from './types';
 import { decodeProductData, decodeHtmlEntities } from './utils';
 
-const TIP4SERV_DIRECT_KEY = import.meta.env.VITE_TIP4SERV_API_KEY as string | undefined;
+const TIP4SERV_DIRECT_KEY = (import.meta.env as Record<string, string | undefined>).TIP4SERV_API_KEY;
 const TIP4SERV_BASE = 'https://api.tip4serv.com/v1';
 const PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tip4serv-proxy`;
 const USE_DIRECT = Boolean(TIP4SERV_DIRECT_KEY && TIP4SERV_DIRECT_KEY.length > 0);

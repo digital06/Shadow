@@ -15,7 +15,7 @@ Vous avez **deux modes** au choix :
 2. Renseigner votre clé Tip4Serv :
 
 ```env
-VITE_TIP4SERV_API_KEY=votre_cle_tip4serv_ici
+TIP4SERV_API_KEY=votre_cle_tip4serv_ici
 ```
 
 3. Relancer le build (`npm run build`) puis redéployer le site
@@ -30,7 +30,7 @@ Tout ce qui commence par `VITE_` est **inclus dans le bundle JavaScript public**
 
 ## Mode B — Proxy Supabase (sécurisé)
 
-1. Laisser `VITE_TIP4SERV_API_KEY` **vide** dans `.env`
+1. Laisser `TIP4SERV_API_KEY` **vide** dans `.env`
 2. Configurer Supabase :
 
 ```env
