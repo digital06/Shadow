@@ -1,9 +1,16 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleCheck as CheckCircle, Server, ShoppingBag, Clock, Shield } from 'lucide-react';
 import { useT } from '../lib/i18n';
+import { useCart } from '../lib/cart';
 
 export default function CheckoutSuccessPage() {
   const t = useT();
+  const { clearCart } = useCart();
+
+  useEffect(() => {
+    clearCart();
+  }, [clearCart]);
   return (
     <div className="pt-32 pb-16 animate-fade-in">
       <div className="max-w-2xl mx-auto px-4">

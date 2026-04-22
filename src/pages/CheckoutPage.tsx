@@ -24,7 +24,7 @@ const IDENTIFIER_KEYS = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, clearCart } = useCart();
+  const { items, removeItem, updateQuantity } = useCart();
   const { store } = useStore();
   const { addToast } = useToast();
   const t = useT();
@@ -219,7 +219,6 @@ export default function CheckoutPage() {
 
       const result = await createCheckout(store.id, body);
       setIsRedirecting(true);
-      clearCart();
       window.location.href = result.url;
     } catch (err) {
       const msg = err instanceof Error
@@ -229,7 +228,7 @@ export default function CheckoutPage() {
       addToast(msg, 'error', 5000);
       setLoadingCheckout(false);
     }
-  }, [store, items, identifierValues, requiredIdentifiers, clearCart, addToast, acceptedTerms]);
+  }, [store, items, identifierValues, requiredIdentifiers, addToast, acceptedTerms]);
 
   if (isRedirecting) {
     return (
