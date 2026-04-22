@@ -386,7 +386,7 @@ function CartItemOptionsSummary({
     const parentField = fields.find((pf) => pf.id === f.parent!.customFieldId);
     if (!parentField?.options) return false;
     const selectedOpt = parentField.options.find(
-      (o) => String(o.value) === String(parentVal)
+      (o) => String(o.id) === String(parentVal)
     );
     return selectedOpt ? String(selectedOpt.id) === String(f.parent.optionId) : false;
   };
@@ -398,7 +398,7 @@ function CartItemOptionsSummary({
       let displayValue = String(val);
 
       if ((f.type === 'select' || f.type === 'selection') && f.options) {
-        const opt = f.options.find((o) => String(o.value) === String(val));
+        const opt = f.options.find((o) => String(o.id) === String(val));
         if (opt) displayValue = opt.name;
       } else if (f.type === 'checkbox') {
         displayValue = val === 1 || val === '1' ? t('common.yes') : t('common.no');

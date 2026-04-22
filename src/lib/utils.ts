@@ -20,7 +20,7 @@ export function isNiveauHidden(
   if (val === undefined || val === null) return false;
 
   const selectedOpt = statsField.options?.find(
-    (o) => String(o.value) === String(val)
+    (o) => String(o.id) === String(val)
   );
   if (!selectedOpt) return false;
 
@@ -46,6 +46,18 @@ export function isNiveauField(field: CustomField): boolean {
 export function getCustomFieldDefaults(fields: CustomField[]): Record<string, string | number> {
   const defaults: Record<string, string | number> = {};
   fields.forEach((f) => {
+    if ((f.type === 'select' || f.type === 'selection') && f.options?.length) {
+      const sorted = [...f.options].sort((a, b) => Number(a.order) - Number(b.order));
+      if (f.default_value !== undefined) {
+        const match = sorted.find(
+          (o) => String(o.id) === String(f.default_value) || String(o.value) === String(f.default_value)
+        );
+        defaults[String(f.id)] = match ? match.id : sorted[0].id;
+      } else {
+        defaults[String(f.id)] = sorted[0].id;
+      }
+      return;
+    }
     if (f.default_value !== undefined) {
       const dv = String(f.default_value);
       if (f.type === 'number' && dv.includes('-')) {
@@ -55,8 +67,6 @@ export function getCustomFieldDefaults(fields: CustomField[]): Record<string, st
       }
     } else if (f.type === 'number' && f.minimum !== undefined) {
       defaults[String(f.id)] = Number(f.minimum) || 0;
-    } else if ((f.type === 'select' || f.type === 'selection') && f.options?.[0]) {
-      defaults[String(f.id)] = f.options[0].value;
     } else if (f.type === 'checkbox') {
       defaults[String(f.id)] = 0;
     }

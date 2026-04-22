@@ -14,7 +14,7 @@ function isFieldVisible(
   const parentField = allFields.find((pf) => pf.id === field.parent!.customFieldId);
   if (!parentField?.options) return false;
   const selectedOpt = parentField.options.find(
-    (o) => String(o.value) === String(parentVal)
+    (o) => String(o.id) === String(parentVal)
   );
   return selectedOpt ? String(selectedOpt.id) === String(field.parent.optionId) : false;
 }
@@ -30,7 +30,7 @@ export function computeExtrasPrice(
     if (!isFieldVisible(f, fields, values, hideNiveau)) return;
     const val = values[String(f.id)];
     if ((f.type === 'select' || f.type === 'selection') && f.options) {
-      const opt = f.options.find((o) => String(o.value) === String(val));
+      const opt = f.options.find((o) => String(o.id) === String(val));
       if (opt) {
         extra += Number(opt.price) || 0;
       }

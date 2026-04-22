@@ -101,7 +101,7 @@ export default function CheckoutPage() {
         const parentField = allFields.find((f) => f.id === field.parent!.customFieldId);
         if (!parentField?.options) return false;
         const selectedOpt = parentField.options.find(
-          (o) => String(o.value) === String(parentVal)
+          (o) => String(o.id) === String(parentVal)
         );
         return selectedOpt ? String(selectedOpt.id) === String(field.parent.optionId) : false;
       };
@@ -159,7 +159,7 @@ export default function CheckoutPage() {
             const parentField = allFields.find((pf) => pf.id === f.parent!.customFieldId);
             if (!parentField?.options) return false;
             const selectedOpt = parentField.options.find(
-              (o) => String(o.value) === String(parentVal)
+              (o) => String(o.id) === String(parentVal)
             );
             return selectedOpt ? String(selectedOpt.id) === String(f.parent.optionId) : false;
           };
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
               } else if (field.type === 'checkbox') {
                 val = 0;
               } else if ((field.type === 'select' || field.type === 'selection') && field.options?.length) {
-                val = field.options[0].value;
+                val = field.options[0].id;
               } else {
                 val = field.default_value ?? '';
               }
@@ -185,8 +185,8 @@ export default function CheckoutPage() {
               continue;
             }
             if ((field.type === 'select' || field.type === 'selection') && field.options) {
-              const opt = field.options.find((o) => String(o.value) === String(val));
-              converted[fieldId] = opt ? Number(opt.id) : val;
+              const opt = field.options.find((o) => String(o.id) === String(val));
+              converted[fieldId] = opt ? Number(opt.id) : Number(val) || val;
             } else {
               converted[fieldId] = typeof val === 'number' && isNaN(val) ? 0 : val;
             }

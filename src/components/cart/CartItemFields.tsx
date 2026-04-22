@@ -27,7 +27,7 @@ export default function CartItemFields({ fields, values, onChange }: Props) {
       const parentField = fields.find((f) => f.id === field.parent!.customFieldId);
       if (!parentField?.options) return false;
       const selectedOption = parentField.options.find(
-        (o) => String(o.value) === String(parentValue)
+        (o) => String(o.id) === String(parentValue)
       );
       if (!selectedOption) return false;
       return String(selectedOption.id) === String(field.parent.optionId);
@@ -46,7 +46,7 @@ export default function CartItemFields({ fields, values, onChange }: Props) {
           }
         }
         const selectedOpt = parentField.options?.find(
-          (o) => String(o.value) === String(value)
+          (o) => String(o.id) === String(value)
         );
         if (selectedOpt) {
           for (const child of fields) {
@@ -62,7 +62,10 @@ export default function CartItemFields({ fields, values, onChange }: Props) {
                 next[String(child.id)] = Number(child.default_value) || 0;
               } else if (isSelectType(child.type) && child.options?.length) {
                 const s = [...child.options].sort((a, b) => Number(a.order) - Number(b.order));
-                next[String(child.id)] = child.default_value ?? s[0].value;
+                const defOpt = child.default_value !== undefined
+                  ? s.find((o) => String(o.id) === String(child.default_value) || String(o.value) === String(child.default_value))
+                  : undefined;
+                next[String(child.id)] = defOpt ? defOpt.id : s[0].id;
               } else if (child.default_value !== undefined) {
                 next[String(child.id)] = child.default_value;
               }
@@ -154,7 +157,7 @@ function CompactSelect({
           {options.map((opt) => {
             const relPrice = (Number(opt.price) || 0) - minPrice;
             return (
-              <option key={opt.id} value={opt.value}>
+              <option key={opt.id} value={opt.id}>
                 {opt.name}
                 {relPrice > 0 ? ` (+${relPrice.toFixed(2)} EUR)` : ''}
               </option>
