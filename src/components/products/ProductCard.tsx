@@ -17,6 +17,10 @@ export default function ProductCard({ product, index = 0 }: Props) {
                 product.name?.toLowerCase().includes('nouveau') ||
                 (product.id && product.id > 9000);
 
+  const stockTracked = product.enable_stock && product.stock !== undefined;
+  const outOfStock = stockTracked && (product.stock ?? 0) <= 0;
+  const lowStock = stockTracked && !outOfStock && (product.stock ?? 0) <= 5;
+
   return (
     <Link
       to={`/product/${product.slug}`}
@@ -52,6 +56,24 @@ export default function ProductCard({ product, index = 0 }: Props) {
           )}
           {product.featured && <Badge variant="featured">{t('product.badge.star')}</Badge>}
         </div>
+
+        {stockTracked && (
+          <div className="absolute top-3 right-3">
+            {outOfStock ? (
+              <Badge variant="out_of_stock">{t('product.stock.out_of_stock')}</Badge>
+            ) : lowStock ? (
+              <Badge variant="low_stock">
+                {t('product.stock.low_stock', { qty: product.stock ?? 0 })}
+              </Badge>
+            ) : (
+              <Badge variant="in_stock">{t('product.stock.in_stock')}</Badge>
+            )}
+          </div>
+        )}
+
+        {outOfStock && (
+          <div className="absolute inset-0 bg-volcanic-950/50 backdrop-blur-[1px]" aria-hidden="true" />
+        )}
       </div>
 
       <div className="relative p-4 lg:p-5 flex flex-col flex-1">

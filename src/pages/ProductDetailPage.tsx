@@ -96,6 +96,18 @@ export default function ProductDetailPage() {
     return computeExtrasPrice(product?.custom_fields, customFieldValues);
   }, [product, customFieldValues]);
 
+  const stockTracked = !!product?.enable_stock && product?.stock !== undefined;
+  const stockValue = product?.stock ?? 0;
+  const outOfStock = stockTracked && stockValue <= 0;
+  const lowStock = stockTracked && !outOfStock && stockValue <= 5;
+  const maxQuantity = stockTracked ? Math.max(1, stockValue) : Infinity;
+
+  useEffect(() => {
+    if (stockTracked && quantity > maxQuantity) {
+      setQuantity(Math.max(1, maxQuantity));
+    }
+  }, [stockTracked, maxQuantity, quantity]);
+
   if (loading) {
     return (
       <div className="pt-32">
@@ -236,6 +248,17 @@ export default function ProductDetailPage() {
                 </Badge>
               )}
               {product.featured && <Badge variant="featured">{t('product.badge.featured')}</Badge>}
+              {stockTracked && (
+                outOfStock ? (
+                  <Badge variant="out_of_stock">{t('product.stock.out_of_stock')}</Badge>
+                ) : lowStock ? (
+                  <Badge variant="low_stock">
+                    {t('product.stock.low_stock', { qty: product.stock ?? 0 })}
+                  </Badge>
+                ) : (
+                  <Badge variant="in_stock">{t('product.stock.in_stock')}</Badge>
+                )
+              )}
             </div>
 
             <h1 className="text-3xl lg:text-4xl font-bold text-heading">{product.name}</h1>
@@ -306,9 +329,26 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {product.enable_stock && product.stock !== undefined && (
-              <div className="text-sm text-volcanic-400">
-                <span className="text-heading font-medium">{product.stock}</span> {t('product.stock_suffix')}
+            {stockTracked && (
+              <div className="flex items-center gap-2 text-sm">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    outOfStock
+                      ? 'bg-red-500'
+                      : lowStock
+                      ? 'bg-amber-400 animate-pulse'
+                      : 'bg-emerald-500'
+                  }`}
+                />
+                <span className={outOfStock ? 'text-red-400 font-medium' : 'text-volcanic-400'}>
+                  {outOfStock
+                    ? t('product.stock.out_of_stock')
+                    : (
+                      <>
+                        <span className="text-heading font-medium">{stockValue}</span> {t('product.stock_suffix')}
+                      </>
+                    )}
+                </span>
               </div>
             )}
 
@@ -358,6 +398,7 @@ export default function ProductDetailPage() {
             {product.subscription ? (
               <div className="space-y-3">
                 <button
+                  disabled={outOfStock}
                   onClick={() => {
                     if (!product) return;
                     const result = addItem(
@@ -372,12 +413,13 @@ export default function ProductDetailPage() {
                     }
                     addToast(t('product.toast.added_one_month', { name: product.name }), 'success');
                   }}
-                  className="w-full py-4 text-base rounded-xl font-semibold flex items-center justify-center gap-2 border-2 border-ark-600/40 text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 hover:border-ark-500/60 transition-all duration-200"
+                  className="w-full py-4 text-base rounded-xl font-semibold flex items-center justify-center gap-2 border-2 border-ark-600/40 text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 hover:border-ark-500/60 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-volcanic-800/40 disabled:hover:border-ark-600/40"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   {t('product.buy_one_month')} {(product.price + extrasPrice).toFixed(2)} &euro;
                 </button>
                 <button
+                  disabled={outOfStock}
                   onClick={() => {
                     if (!product) return;
                     const result = addItem(
@@ -392,7 +434,7 @@ export default function ProductDetailPage() {
                       addToast(t('product.toast.added_subscription', { name: product.name }), 'success');
                     }
                   }}
-                  className="btn-primary w-full py-4 text-base"
+                  className="btn-primary w-full py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <RefreshCw className="w-5 h-5" />
                   {t('product.subscribe')} {(product.price + extrasPrice).toFixed(2)} &euro;
@@ -418,15 +460,22 @@ export default function ProductDetailPage() {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="w-11 h-full flex items-center justify-center text-volcanic-300 hover:text-heading hover:bg-volcanic-700/40 transition-colors"
+                    onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+                    disabled={stockTracked && quantity >= maxQuantity}
+                    className="w-11 h-full flex items-center justify-center text-volcanic-300 hover:text-heading hover:bg-volcanic-700/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
                 <button
+                  disabled={outOfStock}
                   onClick={() => {
                     if (!product) return;
+                    if (stockTracked && quantity > stockValue) {
+                      addToast(t('product.toast.max_stock', { qty: stockValue }), 'warning');
+                      setQuantity(Math.max(1, stockValue));
+                      return;
+                    }
                     const result = addItem(
                       product,
                       customFieldValues,
@@ -441,10 +490,10 @@ export default function ProductDetailPage() {
                     addToast(t('product.toast.added_qty', { name: product.name, qty: quantity }), 'success');
                     setQuantity(1);
                   }}
-                  className="btn-primary flex-1 py-4 text-base"
+                  className="btn-primary flex-1 py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  {t('product.add_to_cart')}
+                  {outOfStock ? t('product.stock.out_of_stock') : t('product.add_to_cart')}
                 </button>
               </div>
             )}
