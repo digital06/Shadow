@@ -413,11 +413,11 @@ function SliderField({
             <span className="text-sm font-semibold text-heading">{numValue}</span>
           </div>
         </div>
-        <div className="flex justify-between text-[11px] text-volcanic-500 px-0.5">
-          <span>{min}</span>
-          {step > 1 && <span className="text-volcanic-600">pas de {step}</span>}
-          <span>{max}</span>
-        </div>
+        {step > 1 && (
+          <div className="flex justify-center text-[11px] text-volcanic-600 px-0.5">
+            <span>pas de {step}</span>
+          </div>
+        )}
         {unitPrice > 0 && relExtra > 0 && (
           <p className="text-xs text-ark-400">
             +{relExtra.toFixed(2)} &euro; (+{numValue - min} pts x {unitPrice.toFixed(2)} &euro;)
