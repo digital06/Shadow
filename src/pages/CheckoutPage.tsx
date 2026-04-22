@@ -65,6 +65,17 @@ export default function CheckoutPage() {
     }
   }, [store, items.length]);
 
+  useEffect(() => {
+    if (loadingInit || requiredIdentifiers.length === 0) return;
+    if (typeof window === 'undefined' || window.innerWidth >= 768) return;
+    const el = document.getElementById('delivery-info');
+    if (!el) return;
+    const id = window.requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [loadingInit, requiredIdentifiers.length]);
+
   const handleCheckout = useCallback(async () => {
     if (!acceptedTerms) {
       addToast(t('checkout.toast.accept_terms'), 'warning');
@@ -417,7 +428,7 @@ export default function CheckoutPage() {
               </div>
             ) : (
               requiredIdentifiers.length > 0 && (
-                <section>
+                <section id="delivery-info" className="scroll-mt-24">
                   <h2 className="text-lg font-semibold text-heading mb-4 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-ark-500" />
                     {t('checkout.section_delivery_info')}
