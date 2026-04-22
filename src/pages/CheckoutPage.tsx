@@ -10,17 +10,17 @@ import { getCheckoutIdentifiers, createCheckout } from '../lib/api';
 import { isNiveauHidden, isNiveauField } from '../lib/utils';
 import type { CheckoutBody, CheckoutProduct, CheckoutUser } from '../lib/types';
 
-const IDENTIFIER_LABELS: Record<string, { label: string; placeholder: string }> = {
-  email: { label: 'Email', placeholder: 'exemple@email.com' },
-  minecraft_username: { label: 'Pseudo Minecraft', placeholder: 'Steve' },
-  steam_id: { label: 'Steam ID', placeholder: '76561198000000000' },
-  discord_id: { label: 'Discord ID', placeholder: '274785054121525250' },
-  epic_id: { label: 'Epic Games ID', placeholder: 'Votre ID Epic Games' },
-  eos_id: { label: 'EOS ID (Epic Online Services)', placeholder: '0123456789abcdef...' },
-  fivem_citizen_id: { label: 'FiveM Citizen ID', placeholder: 'abc123' },
-  ingame_username: { label: 'Pseudo en jeu', placeholder: 'Votre pseudo' },
-  rust_username: { label: 'Pseudo Rust', placeholder: 'Votre pseudo Rust' },
-};
+const IDENTIFIER_KEYS = [
+  'email',
+  'minecraft_username',
+  'steam_id',
+  'discord_id',
+  'epic_id',
+  'eos_id',
+  'fivem_citizen_id',
+  'ingame_username',
+  'rust_username',
+] as const;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -78,7 +78,9 @@ export default function CheckoutPage() {
 
     for (const id of requiredIdentifiers) {
       if (!identifierValues[id]?.trim()) {
-        const label = IDENTIFIER_LABELS[id]?.label || id;
+        const label = (IDENTIFIER_KEYS as readonly string[]).includes(id)
+          ? t(`checkout.identifier.${id}.label`)
+          : id;
         addToast(t('checkout.toast.field_required', { label }), 'warning');
         return;
       }
@@ -389,7 +391,7 @@ export default function CheckoutPage() {
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-xs text-volcanic-500">Qty: 1</span>
+                                <span className="text-xs text-volcanic-500">{t('checkout.quantity_label')} 1</span>
                               )}
                               <span className="text-lg font-bold text-heading">
                                 {lineTotal.toFixed(2)} &euro;
@@ -423,16 +425,18 @@ export default function CheckoutPage() {
                   </h2>
                   <div className="glass-card p-6 space-y-5">
                     {requiredIdentifiers.map((id) => {
-                      const meta = IDENTIFIER_LABELS[id] || { label: id, placeholder: '' };
+                      const known = (IDENTIFIER_KEYS as readonly string[]).includes(id);
+                      const label = known ? t(`checkout.identifier.${id}.label`) : id;
+                      const placeholder = known ? t(`checkout.identifier.${id}.placeholder`) : '';
                       return (
                         <div key={id}>
                           <label className="block text-sm font-medium text-volcanic-300 mb-2">
-                            {meta.label}
+                            {label}
                             <span className="text-red-400 ml-1">*</span>
                           </label>
                           <input
                             type={id === 'email' ? 'email' : 'text'}
-                            placeholder={meta.placeholder}
+                            placeholder={placeholder}
                             value={identifierValues[id] || ''}
                             onChange={(e) =>
                               setIdentifierValues((prev) => ({
