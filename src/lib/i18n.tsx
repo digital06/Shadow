@@ -462,7 +462,7 @@ const en: Dict = {
   'checkout.quantity_label': 'Qty:',
   'checkout.summary.title': 'Summary',
   'checkout.summary.promo_note': 'Promo codes and gift cards can be applied on the payment page.',
-  'checkout.terms.text': 'In accordance with Article L221-28 of the French Consumer Code, the customer waives their right of withdrawal upon accessing the digital content. No refund will be possible after activation, except for a proven technical defect.',
+  'checkout.terms.text': 'The customer waives their right of withdrawal upon accessing the digital content. No refund will be possible after activation, except for a proven technical defect.',
   'checkout.button.redirecting': 'Redirecting...',
   'checkout.button.pay': 'Pay',
 
