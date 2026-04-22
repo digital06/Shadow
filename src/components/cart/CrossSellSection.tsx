@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Star, Sparkles, Loader as Loader2 } from 'lucide-react';
+import { Plus, Star, Sparkles, Loader as Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAllProducts, getProductBySlug } from '../../lib/api';
 import { fallbackProducts } from '../../data/fallback';
 import { useCart, type CartItem } from '../../lib/cart';
@@ -97,17 +97,70 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
     }
   }
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateScrollState, { passive: true });
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, [updateScrollState, suggestions.length]);
+
+  function scrollBy(direction: 1 | -1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const amount = Math.max(160, Math.floor(el.clientWidth * 0.7));
+    el.scrollBy({ left: direction * amount, behavior: 'smooth' });
+  }
+
   if (loading || suggestions.length === 0 || hasSubscription) return null;
 
   return (
     <div className="border-t border-volcanic-800/50 bg-volcanic-950/40">
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-4 pt-4 pb-2 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-heading flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-ark-500" />
           {t('crosssell.title')}
         </h3>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => scrollBy(-1)}
+            disabled={!canScrollLeft}
+            aria-label="Précédent"
+            className="w-7 h-7 flex items-center justify-center rounded-md bg-volcanic-800/60 border border-volcanic-700/60 text-volcanic-300 hover:bg-volcanic-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollBy(1)}
+            disabled={!canScrollRight}
+            aria-label="Suivant"
+            className="w-7 h-7 flex items-center justify-center rounded-md bg-volcanic-800/60 border border-volcanic-700/60 text-volcanic-300 hover:bg-volcanic-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-      <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-thin">
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-thin scroll-smooth"
+      >
         {suggestions.map((product) => {
           const img = product.image || product.gallery?.[0];
 
