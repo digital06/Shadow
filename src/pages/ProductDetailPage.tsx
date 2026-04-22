@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
             </div>
 
             {images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex gap-3 overflow-x-auto px-1 py-2 scrollbar-thin">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
