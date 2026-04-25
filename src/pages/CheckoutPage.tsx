@@ -7,6 +7,7 @@ import { useToast } from '../lib/toast';
 import { useT } from '../lib/i18n';
 import { computeExtrasPrice } from '../lib/pricing';
 import { getCheckoutIdentifiers, createCheckout } from '../lib/api';
+import { useTip4ServAuth } from '../lib/tip4servAuth';
 import { isNiveauHidden, isNiveauField } from '../lib/utils';
 import type { CheckoutBody, CheckoutProduct, CheckoutUser } from '../lib/types';
 
@@ -28,8 +29,10 @@ export default function CheckoutPage() {
   const { store } = useStore();
   const { addToast } = useToast();
   const t = useT();
+  const { user: tipUser } = useTip4ServAuth();
   const [requiredIdentifiers, setRequiredIdentifiers] = useState<string[]>([]);
   const [identifierValues, setIdentifierValues] = useState<Record<string, string>>({});
+  const [autofilledFields, setAutofilledFields] = useState<Set<string>>(new Set());
   const [loadingInit, setLoadingInit] = useState(true);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -64,6 +67,28 @@ export default function CheckoutPage() {
       setLoadingInit(false);
     }
   }, [store, items.length]);
+
+  useEffect(() => {
+    if (!tipUser || requiredIdentifiers.length === 0) return;
+    setIdentifierValues((prev) => {
+      const next = { ...prev };
+      const filled = new Set(autofilledFields);
+      for (const id of requiredIdentifiers) {
+        if (next[id]?.trim()) continue;
+        let value: string | undefined;
+        if (id === 'email' && tipUser.email) value = tipUser.email;
+        else if ((id === 'minecraft_username' || id === 'ingame_username' || id === 'rust_username') && tipUser.username) {
+          value = tipUser.username;
+        }
+        if (value) {
+          next[id] = value;
+          filled.add(id);
+        }
+      }
+      if (filled.size !== autofilledFields.size) setAutofilledFields(filled);
+      return next;
+    });
+  }, [tipUser, requiredIdentifiers]);
 
   useEffect(() => {
     if (loadingInit || requiredIdentifiers.length === 0) return;
@@ -438,22 +463,34 @@ export default function CheckoutPage() {
                       const known = (IDENTIFIER_KEYS as readonly string[]).includes(id);
                       const label = known ? t(`checkout.identifier.${id}.label`) : id;
                       const placeholder = known ? t(`checkout.identifier.${id}.placeholder`) : '';
+                      const wasAutofilled = autofilledFields.has(id) && identifierValues[id]?.trim();
                       return (
                         <div key={id}>
                           <label className="block text-sm font-medium text-volcanic-300 mb-2">
                             {label}
                             <span className="text-red-400 ml-1">*</span>
+                            {wasAutofilled && (
+                              <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ark-600/15 text-ark-400 border border-ark-600/30">
+                                <ShieldCheck className="w-3 h-3" />
+                                Tip4Serv
+                              </span>
+                            )}
                           </label>
                           <input
                             type={id === 'email' ? 'email' : 'text'}
                             placeholder={placeholder}
                             value={identifierValues[id] || ''}
-                            onChange={(e) =>
-                              setIdentifierValues((prev) => ({
-                                ...prev,
-                                [id]: e.target.value,
-                              }))
-                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setIdentifierValues((prev) => ({ ...prev, [id]: value }));
+                              if (autofilledFields.has(id)) {
+                                setAutofilledFields((prev) => {
+                                  const next = new Set(prev);
+                                  next.delete(id);
+                                  return next;
+                                });
+                              }
+                            }}
                             className="input-field"
                           />
                         </div>

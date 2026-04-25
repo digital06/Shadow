@@ -18,8 +18,19 @@ const SCRIPT_ID = 'tip4serv-js-sdk';
 const SCRIPT_URL = 'https://js.tip4serv.com/tip4serv.min.js?v=1.0.16';
 const CALLBACK_QUERY_PARAM = 'tip4serv_access_token';
 
+export interface Tip4ServUser {
+  id: number;
+  username?: string;
+  email?: string;
+  language?: string;
+  timezone?: string;
+  registration_date?: number;
+  profile_picture?: string;
+}
+
 interface Tip4ServAuthValue {
   token: string | null;
+  user: Tip4ServUser | null;
   ready: boolean;
   loading: boolean;
   connect: () => void;
@@ -28,11 +39,25 @@ interface Tip4ServAuthValue {
 
 const AuthContext = createContext<Tip4ServAuthValue>({
   token: null,
+  user: null,
   ready: false,
   loading: false,
   connect: () => {},
   logout: () => {},
 });
+
+async function fetchUser(token: string): Promise<Tip4ServUser | null> {
+  try {
+    const res = await fetch('https://api.tip4serv.com/v1/user/whoami', {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data?.user ?? data) as Tip4ServUser;
+  } catch {
+    return null;
+  }
+}
 
 function loadSdk(storeId: number | string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -80,9 +105,22 @@ function stripCallbackParams() {
 export function Tip4ServAuthProvider({ children }: { children: ReactNode }) {
   const { store } = useStore();
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<Tip4ServUser | null>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const handledRef = useRef(false);
+
+  useEffect(() => {
+    if (!token) {
+      setUser(null);
+      return;
+    }
+    let cancelled = false;
+    fetchUser(token).then((u) => {
+      if (!cancelled) setUser(u);
+    });
+    return () => { cancelled = true; };
+  }, [token]);
 
   useEffect(() => {
     if (!store?.id) return;
@@ -139,10 +177,11 @@ export function Tip4ServAuthProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     setToken(null);
+    setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, ready, loading, connect, logout }}>
+    <AuthContext.Provider value={{ token, user, ready, loading, connect, logout }}>
       {children}
     </AuthContext.Provider>
   );
