@@ -28,6 +28,89 @@ export interface Tip4ServUser {
   profile_picture?: string;
 }
 
+export interface Tip4ServPayment {
+  id: number;
+  status: string;
+  cart: string;
+  sub_id: number;
+  date: number;
+  amount: number;
+  currency: string;
+  username: string;
+  identifier: string;
+  gateway: string;
+  details_page: string;
+}
+
+export interface Tip4ServSubscription {
+  id: number;
+  name: string;
+  status: string;
+  price: number;
+  onetime: boolean;
+  username: string;
+  start_date: number;
+  next_payment: number;
+  expire_date: number;
+  unsubscribed: boolean;
+  duration_periodicity: string;
+  period_num: number;
+  currency: string;
+  details_page: string;
+}
+
+const API_BASE = 'https://api.tip4serv.com/v1';
+
+async function authFetch<T>(token: string, path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(init?.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const msg = data?.error?.message || data?.message || data?.error || `Request failed: ${res.status}`;
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+export async function fetchUserPayments(
+  token: string,
+  page = 1,
+  maxPage = 50
+): Promise<{ payments: Tip4ServPayment[]; payment_count: number }> {
+  return authFetch(token, `/user/payments?page=${page}&max_page=${maxPage}`);
+}
+
+export async function fetchUserSubscriptions(
+  token: string,
+  page = 1,
+  maxPage = 50,
+  onlyRecurring = false
+): Promise<{ subscriptions: Tip4ServSubscription[]; subscription_count: number }> {
+  const params = new URLSearchParams({
+    page: String(page),
+    max_page: String(maxPage),
+    only_recurring_subscription: String(onlyRecurring),
+  });
+  return authFetch(token, `/user/subscriptions?${params}`);
+}
+
+export async function unsubscribeUserSubscription(
+  token: string,
+  subscriptionId: number
+): Promise<{ status: number; message: string }> {
+  return authFetch(token, '/user/subscriptions/unsubscribe', {
+    method: 'PATCH',
+    body: JSON.stringify({ subscription_id: subscriptionId }),
+  });
+}
+
 interface Tip4ServAuthValue {
   token: string | null;
   user: Tip4ServUser | null;

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, Hop as Home, Package, ExternalLink, LogIn, Link2, Globe, Check } from 'lucide-react';
+import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, Hop as Home, Package, ExternalLink, LogIn, Link2, Globe, Check, User as UserIcon, CreditCard, Repeat, LogOut } from 'lucide-react';
 import { useCart } from '../../lib/cart';
 import { useStore } from '../../lib/store';
 import { useTheme } from '../../lib/theme';
 import { useLanguage, type Language } from '../../lib/i18n';
+import { useTip4ServAuth } from '../../lib/tip4servAuth';
 import { getCategories } from '../../lib/api';
 import { getCategoryIcon } from '../../lib/categoryIcons';
 import { stripHtml } from '../../lib/utils';
@@ -14,21 +15,21 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const megaTimeout = useRef<ReturnType<typeof setTimeout>>();
   const megaRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { itemCount, openCart } = useCart();
   const { store } = useStore();
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
+  const { token: authToken, user: authUser, ready: authReady, connect: authConnect, logout: authLogout } = useTip4ServAuth();
   const storeName = store?.title || 'ARK Shop';
   const menuLinks = store?.menu_links ?? [];
-  const loginUrl = store?.domain
-    ? `https://${store.domain}.tip4serv.com/prelogin?redirect=dashboard/profil`
-    : 'https://arkfrance.tip4serv.com/prelogin?redirect=dashboard/profil';
 
   useEffect(() => {
     function handleScroll() {
@@ -50,6 +51,7 @@ export default function Header() {
     setMobileOpen(false);
     setMegaOpen(false);
     setLangOpen(false);
+    setUserOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -61,6 +63,16 @@ export default function Header() {
     if (langOpen) document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [langOpen]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (userRef.current && !userRef.current.contains(e.target as Node)) {
+        setUserOpen(false);
+      }
+    }
+    if (userOpen) document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [userOpen]);
 
   const openMega = useCallback(() => {
     clearTimeout(megaTimeout.current);
@@ -195,13 +207,76 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <a
-              href={loginUrl}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60 transition-all duration-200"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>{t('header.login')}</span>
-            </a>
+            {authToken && authUser ? (
+              <div ref={userRef} className="relative hidden md:block">
+                <button
+                  onClick={() => setUserOpen((v) => !v)}
+                  className="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-lg text-sm font-medium text-volcanic-200 hover:text-heading hover:bg-volcanic-800/60 transition-all duration-200"
+                  aria-haspopup="menu"
+                  aria-expanded={userOpen}
+                >
+                  <span className="w-7 h-7 rounded-full overflow-hidden bg-volcanic-800 border border-volcanic-700/40 flex items-center justify-center shrink-0">
+                    {authUser.profile_picture ? (
+                      <img src={authUser.profile_picture} alt={authUser.username || ''} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-3.5 h-3.5 text-volcanic-400" />
+                    )}
+                  </span>
+                  <span className="max-w-[120px] truncate">{authUser.username || authUser.email || 'Compte'}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${userOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {userOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-60 bg-volcanic-900/95 backdrop-blur-2xl border border-volcanic-800/60 rounded-xl shadow-2xl shadow-black/40 overflow-hidden animate-fade-in-down p-1.5 z-50">
+                    <div className="px-3 py-2.5 border-b border-volcanic-800/60 mb-1">
+                      <p className="text-sm font-semibold text-heading truncate">{authUser.username || 'Mon compte'}</p>
+                      {authUser.email && (
+                        <p className="text-xs text-volcanic-500 truncate">{authUser.email}</p>
+                      )}
+                    </div>
+                    <Link
+                      to="/account"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-volcanic-200 hover:text-heading hover:bg-volcanic-800/60 transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      Mon profil
+                    </Link>
+                    <Link
+                      to="/account?tab=payments"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-volcanic-200 hover:text-heading hover:bg-volcanic-800/60 transition-colors"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      Mes paiements
+                    </Link>
+                    <Link
+                      to="/account?tab=subscriptions"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-volcanic-200 hover:text-heading hover:bg-volcanic-800/60 transition-colors"
+                    >
+                      <Repeat className="w-4 h-4" />
+                      Mes abonnements
+                    </Link>
+                    <button
+                      onClick={() => {
+                        authLogout();
+                        setUserOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition-colors mt-1 border-t border-volcanic-800/60 pt-2.5"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Se déconnecter
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={authConnect}
+                disabled={!authReady}
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/60 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>{t('header.login')}</span>
+              </button>
+            )}
 
             <div ref={langRef} className="relative hidden md:block">
               <button
@@ -313,13 +388,40 @@ export default function Header() {
                 </a>
               ))}
 
-              <a
-                href={loginUrl}
-                className="flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/40 transition-all duration-200"
-              >
-                <LogIn className="w-4 h-4" />
-                {t('header.login')}
-              </a>
+              {authToken && authUser ? (
+                <>
+                  <Link
+                    to="/account"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/40 transition-all duration-200"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    {authUser.username ? `Compte (${authUser.username})` : 'Mon compte'}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      authLogout();
+                      setMobileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-rose-300 hover:bg-rose-500/10 transition-all duration-200"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Se déconnecter
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    authConnect();
+                    setMobileOpen(false);
+                  }}
+                  disabled={!authReady}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading hover:bg-volcanic-800/40 transition-all duration-200 disabled:opacity-50"
+                >
+                  <LogIn className="w-4 h-4" />
+                  {t('header.login')}
+                </button>
+              )}
 
               <div className="pt-2 pb-1">
                 <div className="divider-gradient mb-3" />
