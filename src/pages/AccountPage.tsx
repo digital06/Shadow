@@ -25,6 +25,7 @@ import {
   type Tip4ServSubscription,
 } from '../lib/tip4servAuth';
 import { useToast } from '../lib/toast';
+import { useT } from '../lib/i18n';
 
 type TabKey = 'profile' | 'payments' | 'subscriptions';
 
@@ -51,7 +52,7 @@ function formatAmount(amount: number, currency: string): string {
   }
 }
 
-function StatusPill({ status }: { status: string }) {
+function StatusPill({ status, unknownLabel }: { status: string; unknownLabel: string }) {
   const s = (status || '').toLowerCase();
   const isPaid = s === 'paid';
   const isProcessed = ['processed', 'complete', 'completed', 'succeeded', 'success', 'active'].includes(s);
@@ -67,19 +68,20 @@ function StatusPill({ status }: { status: string }) {
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-semibold uppercase tracking-wider ${cls}`}>
       <Icon className="w-3 h-3" />
-      {status || 'unknown'}
+      {status || unknownLabel}
     </span>
   );
 }
 
 export default function AccountPage() {
   const navigate = useNavigate();
+  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const { token, user, ready, loading, connect, logout } = useTip4ServAuth();
   const { addToast } = useToast();
   const initialTab = ((): TabKey => {
-    const t = searchParams.get('tab');
-    return t === 'payments' || t === 'subscriptions' ? t : 'profile';
+    const tp = searchParams.get('tab');
+    return tp === 'payments' || tp === 'subscriptions' ? tp : 'profile';
   })();
   const [tab, setTab] = useState<TabKey>(initialTab);
 
@@ -123,24 +125,24 @@ export default function AccountPage() {
   const handleUnsubscribe = useCallback(
     async (subscriptionId: number) => {
       if (!token) return;
-      const ok = window.confirm('Confirmer la résiliation de cet abonnement ?');
+      const ok = window.confirm(t('account.subs.confirm_unsubscribe'));
       if (!ok) return;
       setUnsubBusy(subscriptionId);
       try {
         await unsubscribeUserSubscription(token, subscriptionId);
-        addToast('Abonnement résilié.', 'success');
+        addToast(t('account.subs.toast_unsubscribed'), 'success');
         setSubs((prev) =>
           prev
             ? prev.map((s) => (s.id === subscriptionId ? { ...s, unsubscribed: true } : s))
             : prev
         );
       } catch (e) {
-        addToast(e instanceof Error ? e.message : 'Erreur lors de la résiliation', 'error');
+        addToast(e instanceof Error ? e.message : t('account.subs.toast_error'), 'error');
       } finally {
         setUnsubBusy(null);
       }
     },
-    [token, addToast]
+    [token, addToast, t]
   );
 
   if (!ready || loading) {
@@ -148,7 +150,7 @@ export default function AccountPage() {
       <div className="pt-32 pb-16">
         <div className="max-w-md mx-auto px-4 text-center">
           <Loader2 className="w-8 h-8 text-ark-500 animate-spin mx-auto mb-4" />
-          <p className="text-volcanic-400">Chargement de votre espace...</p>
+          <p className="text-volcanic-400">{t('account.loading')}</p>
         </div>
       </div>
     );
@@ -161,20 +163,20 @@ export default function AccountPage() {
           <div className="w-20 h-20 rounded-full bg-ark-600/15 flex items-center justify-center mx-auto mb-6">
             <UserIcon className="w-10 h-10 text-ark-500" />
           </div>
-          <h1 className="text-2xl font-bold text-heading mb-3">Accédez à votre espace</h1>
+          <h1 className="text-2xl font-bold text-heading mb-3">{t('account.signin.title')}</h1>
           <p className="text-volcanic-400 mb-8">
-            Connectez-vous via Tip4Serv pour consulter vos paiements et gérer vos abonnements.
+            {t('account.signin.subtitle')}
           </p>
           <button onClick={connect} className="btn-primary px-8 py-3">
             <UserIcon className="w-5 h-5" />
-            Se connecter avec Tip4Serv
+            {t('account.signin.button')}
           </button>
           <button
             onClick={() => navigate(-1)}
             className="mt-4 inline-flex items-center gap-2 text-sm text-volcanic-400 hover:text-heading transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour
+            {t('common.back')}
           </button>
         </div>
       </div>
@@ -182,9 +184,9 @@ export default function AccountPage() {
   }
 
   const tabs: { key: TabKey; label: string; icon: typeof UserIcon }[] = [
-    { key: 'profile', label: 'Profil', icon: UserIcon },
-    { key: 'payments', label: 'Paiements', icon: CreditCard },
-    { key: 'subscriptions', label: 'Abonnements', icon: Repeat },
+    { key: 'profile', label: t('account.tabs.profile'), icon: UserIcon },
+    { key: 'payments', label: t('account.tabs.payments'), icon: CreditCard },
+    { key: 'subscriptions', label: t('account.tabs.subscriptions'), icon: Repeat },
   ];
 
   return (
@@ -193,10 +195,10 @@ export default function AccountPage() {
         <div className="flex items-center gap-2 text-sm text-volcanic-400 mb-6">
           <Link to="/" className="inline-flex items-center gap-2 hover:text-heading transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Accueil
+            {t('header.home')}
           </Link>
           <span>/</span>
-          <span className="text-volcanic-500">Mon compte</span>
+          <span className="text-volcanic-500">{t('account.breadcrumb.account')}</span>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
@@ -210,7 +212,7 @@ export default function AccountPage() {
             </div>
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-heading">
-                {user?.username || 'Mon compte'}
+                {user?.username || t('account.title_default')}
               </h1>
               {user?.email && (
                 <p className="text-sm text-volcanic-400 flex items-center gap-1.5 mt-0.5">
@@ -225,7 +227,7 @@ export default function AccountPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-rose-300 hover:bg-rose-500/10 border border-volcanic-800/50 hover:border-rose-500/30 transition-all duration-200 self-start md:self-auto"
           >
             <LogOut className="w-4 h-4" />
-            Se déconnecter
+            {t('account.logout')}
           </button>
         </div>
 
@@ -252,30 +254,30 @@ export default function AccountPage() {
 
         {tab === 'profile' && (
           <div className="glass-card p-6 lg:p-8 max-w-2xl">
-            <h2 className="text-lg font-semibold text-heading mb-6">Informations du profil</h2>
+            <h2 className="text-lg font-semibold text-heading mb-6">{t('account.profile.section_title')}</h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">Identifiant</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.id')}</dt>
                 <dd className="text-heading font-medium">{user?.id ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">Pseudo</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.username')}</dt>
                 <dd className="text-heading font-medium">{user?.username || '—'}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">E-mail</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.email')}</dt>
                 <dd className="text-heading font-medium break-all">{user?.email || '—'}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">Langue</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.language')}</dt>
                 <dd className="text-heading font-medium">{user?.language || '—'}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">Fuseau horaire</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.timezone')}</dt>
                 <dd className="text-heading font-medium">{user?.timezone || '—'}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">Inscrit le</dt>
+                <dt className="text-xs uppercase tracking-wider text-volcanic-500 font-semibold mb-1">{t('account.profile.registered_on')}</dt>
                 <dd className="text-heading font-medium flex items-center gap-1.5">
                   <CalendarDays className="w-4 h-4 text-volcanic-500" />
                   {user?.registration_date ? formatDate(user.registration_date) : '—'}
@@ -320,12 +322,13 @@ function EmptyState({ icon: Icon, title, description }: { icon: typeof UserIcon;
 }
 
 function ErrorState({ message }: { message: string }) {
+  const t = useT();
   return (
     <div className="glass-card p-6 border border-rose-500/30">
       <div className="flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
         <div>
-          <p className="text-rose-300 font-semibold mb-1">Impossible de charger</p>
+          <p className="text-rose-300 font-semibold mb-1">{t('account.error.cant_load')}</p>
           <p className="text-volcanic-400 text-sm">{message}</p>
         </div>
       </div>
@@ -351,14 +354,15 @@ function PaymentsPanel({
   error: string | null;
   payments: Tip4ServPayment[] | null;
 }) {
-  if (loading) return <LoadingPanel label="Chargement de l'historique..." />;
+  const t = useT();
+  if (loading) return <LoadingPanel label={t('account.payments.loading')} />;
   if (error) return <ErrorState message={error} />;
   if (!payments || payments.length === 0) {
     return (
       <EmptyState
         icon={CreditCard}
-        title="Aucun paiement"
-        description="Vos achats apparaîtront ici dès votre première commande."
+        title={t('account.payments.empty.title')}
+        description={t('account.payments.empty.description')}
       />
     );
   }
@@ -371,20 +375,20 @@ function PaymentsPanel({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 <span className="text-xs text-volcanic-500 font-mono">#{p.id}</span>
-                <StatusPill status={p.status} />
+                <StatusPill status={p.status} unknownLabel={t('account.status.unknown')} />
                 {p.gateway && (
                   <span className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">
                     {p.gateway}
                   </span>
                 )}
               </div>
-              <h3 className="text-heading font-semibold truncate">{p.cart || 'Commande'}</h3>
+              <h3 className="text-heading font-semibold truncate">{p.cart || t('account.payments.order_default')}</h3>
               <div className="text-xs text-volcanic-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="inline-flex items-center gap-1">
                   <CalendarDays className="w-3.5 h-3.5" />
                   {formatDate(p.date)}
                 </span>
-                {p.identifier && <span className="truncate">Livré à : {p.identifier}</span>}
+                {p.identifier && <span className="truncate">{t('account.payments.delivered_to')} {p.identifier}</span>}
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -400,7 +404,7 @@ function PaymentsPanel({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 border border-volcanic-800/50 transition-colors"
                 >
-                  Détails
+                  {t('account.payments.details')}
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               )}
@@ -425,24 +429,40 @@ function SubscriptionsPanel({
   unsubBusy: number | null;
   onUnsubscribe: (id: number) => void;
 }) {
-  if (loading) return <LoadingPanel label="Chargement des abonnements..." />;
+  const t = useT();
+  if (loading) return <LoadingPanel label={t('account.subs.loading')} />;
   if (error) return <ErrorState message={error} />;
   if (!subs || subs.length === 0) {
     return (
       <EmptyState
         icon={Repeat}
-        title="Aucun abonnement"
-        description="Vos abonnements actifs apparaîtront ici."
+        title={t('account.subs.empty.title')}
+        description={t('account.subs.empty.description')}
       />
     );
   }
+
+  const periodicityKey = (p: string): string => {
+    const k = (p || '').toLowerCase();
+    const map: Record<string, string> = {
+      month: 'periodicity.month',
+      months: 'periodicity.months',
+      week: 'periodicity.week',
+      weeks: 'periodicity.weeks',
+      day: 'periodicity.day',
+      days: 'periodicity.days',
+      year: 'periodicity.year',
+      years: 'periodicity.years',
+    };
+    return map[k] ? t(map[k]) : p;
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {subs.map((s) => {
         const periodLabel = s.period_num && s.duration_periodicity
-          ? `${s.period_num} ${s.duration_periodicity}`
-          : s.duration_periodicity || '';
+          ? `${s.period_num} ${periodicityKey(s.duration_periodicity)}`
+          : periodicityKey(s.duration_periodicity || '');
         const canCancel = !s.unsubscribed && !s.onetime && (s.status || '').toLowerCase() === 'active';
         return (
           <article key={s.id} className="glass-card p-5 flex flex-col">
@@ -451,25 +471,25 @@ function SubscriptionsPanel({
                 <span className="text-xs text-volcanic-500 font-mono">#{s.id}</span>
                 <h3 className="text-heading font-semibold truncate mt-0.5">{s.name}</h3>
               </div>
-              <StatusPill status={s.unsubscribed ? 'unsubscribed' : s.status} />
+              <StatusPill status={s.unsubscribed ? 'unsubscribed' : s.status} unknownLabel={t('account.status.unknown')} />
             </div>
 
             <dl className="grid grid-cols-2 gap-3 text-sm mb-4">
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">Prix</dt>
+                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">{t('account.subs.price')}</dt>
                 <dd className="text-heading font-semibold">{formatAmount(s.price, s.currency)}</dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">Cycle</dt>
-                <dd className="text-heading font-medium">{s.onetime ? 'Unique' : periodLabel || '—'}</dd>
+                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">{t('account.subs.cycle')}</dt>
+                <dd className="text-heading font-medium">{s.onetime ? t('account.subs.cycle_one_time') : periodLabel || '—'}</dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">Début</dt>
+                <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">{t('account.subs.start')}</dt>
                 <dd className="text-heading font-medium">{formatDate(s.start_date)}</dd>
               </div>
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-volcanic-500 font-semibold">
-                  {s.unsubscribed ? 'Expire le' : 'Prochain paiement'}
+                  {s.unsubscribed ? t('account.subs.expires_on') : t('account.subs.next_payment')}
                 </dt>
                 <dd className="text-heading font-medium">
                   {formatDate(s.unsubscribed ? s.expire_date : s.next_payment)}
@@ -489,7 +509,7 @@ function SubscriptionsPanel({
                   ) : (
                     <Ban className="w-3.5 h-3.5" />
                   )}
-                  Se désabonner
+                  {t('account.subs.unsubscribe')}
                 </button>
               </div>
             )}
