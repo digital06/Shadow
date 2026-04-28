@@ -41,7 +41,6 @@ export default function CheckoutPage() {
   const [discordHelpOpen, setDiscordHelpOpen] = useState(false);
   const [discordConnecting, setDiscordConnecting] = useState(false);
   const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
-  const discordOAuthEnabled = Boolean(discordClientId);
 
   const startDiscordOAuth = useCallback(() => {
     if (!discordClientId) {
@@ -589,24 +588,22 @@ export default function CheckoutPage() {
                               )}
                             </label>
                             {isDiscord && (
-                              <div className="flex items-center gap-3">
-                                {discordOAuthEnabled && (
-                                  <button
-                                    type="button"
-                                    onClick={startDiscordOAuth}
-                                    disabled={discordConnecting}
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-[#5865F2] hover:bg-[#4752c4] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                                  >
-                                    {discordConnecting ? (
-                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    ) : (
-                                      <DiscordIcon className="w-3.5 h-3.5" />
-                                    )}
-                                    {discordConnecting
-                                      ? t('checkout.discord_help.connecting')
-                                      : t('checkout.discord_help.connect')}
-                                  </button>
-                                )}
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <button
+                                  type="button"
+                                  onClick={startDiscordOAuth}
+                                  disabled={discordConnecting}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-[#5865F2] hover:bg-[#4752c4] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  {discordConnecting ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <DiscordIcon className="w-3.5 h-3.5" />
+                                  )}
+                                  {discordConnecting
+                                    ? t('checkout.discord_help.connecting')
+                                    : t('checkout.discord_help.connect')}
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => setDiscordHelpOpen(true)}
@@ -794,8 +791,7 @@ export default function CheckoutPage() {
               <h3 className="text-lg font-bold text-heading">{t('checkout.discord_help.title')}</h3>
             </div>
             <p className="text-sm text-volcanic-300 mb-4">{t('checkout.discord_help.intro')}</p>
-            {discordOAuthEnabled && (
-              <div className="mb-5 p-4 rounded-xl bg-[#5865F2]/10 border border-[#5865F2]/30">
+            <div className="mb-5 p-4 rounded-xl bg-[#5865F2]/10 border border-[#5865F2]/30">
                 <button
                   type="button"
                   onClick={startDiscordOAuth}
@@ -815,7 +811,6 @@ export default function CheckoutPage() {
                   {t('checkout.discord_help.or_manual')}
                 </p>
               </div>
-            )}
             <ol className="space-y-3 text-sm text-volcanic-300">
               {[1, 2, 3, 4].map((n) => (
                 <li key={n} className="flex gap-3">
