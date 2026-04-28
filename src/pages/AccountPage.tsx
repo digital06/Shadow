@@ -477,33 +477,22 @@ function SubscriptionsPanel({
               </div>
             </dl>
 
-            <div className="flex items-center gap-2 mt-auto pt-2 border-t border-volcanic-800/40">
-              {s.details_page && (
-                <a
-                  href={s.details_page}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 border border-volcanic-800/50 transition-colors"
-                >
-                  Détails
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-              {canCancel && (
+            {canCancel && (
+              <div className="mt-auto pt-2 border-t border-volcanic-800/40">
                 <button
                   onClick={() => onUnsubscribe(s.id)}
                   disabled={unsubBusy === s.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-300 hover:text-rose-200 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-300 hover:text-rose-200 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {unsubBusy === s.id ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     <Ban className="w-3.5 h-3.5" />
                   )}
-                  Résilier
+                  Se désabonner
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </article>
         );
       })}
