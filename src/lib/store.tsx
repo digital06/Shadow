@@ -26,16 +26,20 @@ function applyStoreSeo(info: StoreInfo) {
   const rawDescription = info.description || info.subtitle || '';
   const description = stripHtml(rawDescription).slice(0, 300) || title;
   const image = info.logo;
+  const url = typeof window !== 'undefined' ? window.location.origin : '';
 
   document.title = title;
   setMeta('meta[name="description"]', 'content', description);
   setMeta('meta[property="og:title"]', 'content', title);
   setMeta('meta[property="og:description"]', 'content', description);
+  setMeta('meta[property="og:url"]', 'content', url);
   setMeta('meta[name="twitter:title"]', 'content', title);
   setMeta('meta[name="twitter:description"]', 'content', description);
   if (image) {
     setMeta('meta[property="og:image"]', 'content', image);
     setMeta('meta[name="twitter:image"]', 'content', image);
+    const favicon = document.head.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    if (favicon) favicon.href = image;
   }
 }
 
