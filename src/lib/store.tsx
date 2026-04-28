@@ -7,6 +7,28 @@ interface StoreContextValue {
   loading: boolean;
 }
 
+const STORE_CACHE_KEY = 'tip4serv_store_cache_v1';
+
+function loadCachedStore(): StoreInfo | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(STORE_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoreInfo;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedStore(info: StoreInfo) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORE_CACHE_KEY, JSON.stringify(info));
+  } catch {
+    // ignore quota errors
+  }
+}
+
 const StoreContext = createContext<StoreContextValue>({ store: null, loading: true });
 
 function stripHtml(html: string): string {
@@ -45,7 +67,11 @@ function applyStoreSeo(info: StoreInfo) {
 
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<StoreInfo | null>(null);
+  const [store, setStore] = useState<StoreInfo | null>(() => {
+    const cached = loadCachedStore();
+    if (cached) applyStoreSeo(cached);
+    return cached;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,6 +79,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .then((info) => {
         setStore(info);
         applyStoreSeo(info);
+        saveCachedStore(info);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
