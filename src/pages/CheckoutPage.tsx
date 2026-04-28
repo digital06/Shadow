@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader as Loader2, ShoppingCart, CircleAlert as AlertCircle, ShieldCheck, Zap, Lock, ShoppingBag, Trash2, Minus, Plus, Circle as HelpCircle, X as XIcon, ClipboardPaste, Check } from 'lucide-react';
+import { ArrowLeft, Loader as Loader2, ShoppingCart, CircleAlert as AlertCircle, ShieldCheck, Zap, Lock, ShoppingBag, Trash2, Minus, Plus, Circle as HelpCircle, X as XIcon, Check } from 'lucide-react';
 import { useCart } from '../lib/cart';
 import { useStore } from '../lib/store';
 import { useToast } from '../lib/toast';
@@ -547,27 +547,6 @@ export default function CheckoutPage() {
                       const isDiscord = id === 'discord_id';
                       const discordValue = identifierValues[id] || '';
                       const discordValid = /^\d{17,20}$/.test(discordValue.trim());
-                      const handlePaste = async () => {
-                        try {
-                          const text = await navigator.clipboard.readText();
-                          const cleaned = text.trim().replace(/[^0-9]/g, '');
-                          if (!/^\d{17,20}$/.test(cleaned)) {
-                            addToast(t('checkout.discord_help.invalid'), 'warning');
-                            return;
-                          }
-                          setIdentifierValues((prev) => ({ ...prev, [id]: cleaned }));
-                          if (autofilledFields.has(id)) {
-                            setAutofilledFields((prev) => {
-                              const next = new Set(prev);
-                              next.delete(id);
-                              return next;
-                            });
-                          }
-                          addToast(t('checkout.discord_help.pasted'), 'success');
-                        } catch {
-                          addToast(t('checkout.discord_help.paste_failed'), 'error');
-                        }
-                      };
                       return (
                         <div key={id}>
                           <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
@@ -632,18 +611,8 @@ export default function CheckoutPage() {
                                   });
                                 }
                               }}
-                              className={`input-field ${isDiscord ? 'pr-32' : ''}`}
+                              className="input-field"
                             />
-                            {isDiscord && (
-                              <button
-                                type="button"
-                                onClick={handlePaste}
-                                className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-volcanic-200 bg-volcanic-800/80 hover:bg-volcanic-700 border border-volcanic-700/60 transition-colors"
-                              >
-                                <ClipboardPaste className="w-3.5 h-3.5" />
-                                {t('checkout.discord_help.paste')}
-                              </button>
-                            )}
                           </div>
                           {isDiscord && discordValue && !discordValid && (
                             <p className="mt-1.5 text-xs text-amber-400 flex items-center gap-1.5">
