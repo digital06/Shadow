@@ -11,7 +11,7 @@ import { fallbackProducts } from '../data/fallback';
 import { useCart } from '../lib/cart';
 import { useToast } from '../lib/toast';
 import { useT } from '../lib/i18n';
-import type { Product, PurchaseType } from '../lib/types';
+import type { Product } from '../lib/types';
 import { getCustomFieldDefaults, translatePeriodicity } from '../lib/utils';
 import { computeExtrasPrice } from '../lib/pricing';
 

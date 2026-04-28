@@ -76,6 +76,7 @@ export default function ProductsPage() {
     }
     loadProducts();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategoryId]);
 
   const activeCategory = activeSlug

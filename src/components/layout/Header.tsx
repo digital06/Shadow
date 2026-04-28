@@ -18,7 +18,7 @@ export default function Header() {
   const [userOpen, setUserOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const megaTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const megaTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const megaRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);

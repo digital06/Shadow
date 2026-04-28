@@ -80,10 +80,13 @@ export default function CheckoutPage() {
 
     setDiscordConnecting(true);
 
-    let pollTimer: number | undefined;
+    const pollTimer = window.setInterval(() => {
+      if (popup.closed) cleanup();
+    }, 500);
+
     const cleanup = () => {
       window.removeEventListener('message', onMessage);
-      if (pollTimer !== undefined) window.clearInterval(pollTimer);
+      window.clearInterval(pollTimer);
       setDiscordConnecting(false);
     };
 
@@ -113,10 +116,6 @@ export default function CheckoutPage() {
     };
 
     window.addEventListener('message', onMessage);
-
-    pollTimer = window.setInterval(() => {
-      if (popup.closed) cleanup();
-    }, 500);
   }, [discordClientId, addToast, t]);
 
   const cartTotal = items.reduce((sum, item) => {
@@ -168,6 +167,7 @@ export default function CheckoutPage() {
       if (filled.size !== autofilledFields.size) setAutofilledFields(filled);
       return next;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipUser, requiredIdentifiers]);
 
   useEffect(() => {
@@ -297,7 +297,7 @@ export default function CheckoutPage() {
                 val = field.default_value ?? '';
               }
             }
-            if (field.type === 'checkbox' && (val === 0 || val === '0' || val === false || val === '')) {
+            if (field.type === 'checkbox' && (val === 0 || val === '0' || val === '')) {
               continue;
             }
             if ((field.type === 'select' || field.type === 'selection') && field.options) {
@@ -344,7 +344,7 @@ export default function CheckoutPage() {
       addToast(msg, 'error', 5000);
       setLoadingCheckout(false);
     }
-  }, [store, items, identifierValues, requiredIdentifiers, addToast, acceptedTerms]);
+  }, [store, items, identifierValues, requiredIdentifiers, addToast, acceptedTerms, t]);
 
   if (isRedirecting) {
     return (

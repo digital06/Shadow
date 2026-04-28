@@ -21,7 +21,6 @@ function errorResponse(status: number, message: string, detail?: string) {
 
 const SERVERDATA_AUTH = 3;
 const SERVERDATA_EXECCOMMAND = 2;
-const SERVERDATA_RESPONSE_VALUE = 0;
 
 function buildPacket(id: number, type: number, body: string): Uint8Array {
   const bodyBytes = new TextEncoder().encode(body);
