@@ -292,6 +292,20 @@ const fr: Dict = {
   'account.subs.toast_error': 'Erreur lors de la résiliation',
   'account.error.cant_load': 'Impossible de charger',
   'account.status.unknown': 'inconnu',
+
+  'checkout.discord_help.button': 'Comment trouver mon Discord ID ?',
+  'checkout.discord_help.title': 'Trouver votre Discord ID',
+  'checkout.discord_help.intro': 'Suivez ces étapes pour récupérer votre identifiant Discord en quelques secondes :',
+  'checkout.discord_help.step1': 'Ouvrez Discord (application ou navigateur), puis cliquez sur l\'icône d\'engrenage en bas à gauche pour accéder aux Paramètres utilisateur.',
+  'checkout.discord_help.step2': 'Dans la section « Avancés », activez l\'option « Mode développeur ».',
+  'checkout.discord_help.step3': 'Fermez les paramètres, faites un clic droit sur votre nom d\'utilisateur (ou votre avatar), puis cliquez sur « Copier l\'identifiant utilisateur ».',
+  'checkout.discord_help.step4': 'Collez la suite de chiffres dans le champ Discord ID ci-dessous.',
+  'checkout.discord_help.tip': 'Astuce : sur mobile, appuyez longuement sur votre profil après avoir activé le Mode développeur, puis sélectionnez « Copier l\'identifiant ».',
+  'checkout.discord_help.paste': 'Coller depuis le presse-papiers',
+  'checkout.discord_help.pasted': 'Identifiant Discord collé !',
+  'checkout.discord_help.paste_failed': 'Impossible de lire le presse-papiers. Collez manuellement.',
+  'checkout.discord_help.invalid': 'L\'identifiant Discord doit contenir uniquement des chiffres (17 à 20).',
+  'checkout.discord_help.close': 'Fermer',
 };
 
 const en: Dict = {
@@ -582,6 +596,20 @@ const en: Dict = {
   'account.subs.toast_error': 'Error while canceling',
   'account.error.cant_load': 'Unable to load',
   'account.status.unknown': 'unknown',
+
+  'checkout.discord_help.button': 'How to find my Discord ID?',
+  'checkout.discord_help.title': 'Find your Discord ID',
+  'checkout.discord_help.intro': 'Follow these steps to grab your Discord user ID in a few seconds:',
+  'checkout.discord_help.step1': 'Open Discord (app or browser) and click the gear icon at the bottom left to open User Settings.',
+  'checkout.discord_help.step2': 'In the "Advanced" section, enable "Developer Mode".',
+  'checkout.discord_help.step3': 'Close the settings, right-click on your username (or avatar), then click "Copy User ID".',
+  'checkout.discord_help.step4': 'Paste the string of digits into the Discord ID field below.',
+  'checkout.discord_help.tip': 'Tip: on mobile, long-press your profile after enabling Developer Mode, then choose "Copy ID".',
+  'checkout.discord_help.paste': 'Paste from clipboard',
+  'checkout.discord_help.pasted': 'Discord ID pasted!',
+  'checkout.discord_help.paste_failed': 'Could not read the clipboard. Please paste manually.',
+  'checkout.discord_help.invalid': 'A Discord ID must contain only digits (17 to 20).',
+  'checkout.discord_help.close': 'Close',
 };
 
 const dictionaries: Record<Language, Dict> = { fr, en };

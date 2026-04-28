@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader as Loader2, ShoppingCart, CircleAlert as AlertCircle, ShieldCheck, Zap, Lock, ShoppingBag, Trash2, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, Loader as Loader2, ShoppingCart, CircleAlert as AlertCircle, ShieldCheck, Zap, Lock, ShoppingBag, Trash2, Minus, Plus, Circle as HelpCircle, X as XIcon, ClipboardPaste, Check } from 'lucide-react';
 import { useCart } from '../lib/cart';
 import { useStore } from '../lib/store';
 import { useToast } from '../lib/toast';
@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [discordHelpOpen, setDiscordHelpOpen] = useState(false);
 
   const cartTotal = items.reduce((sum, item) => {
     const extras = computeExtrasPrice(item.product.custom_fields, item.customFieldValues);
@@ -464,35 +465,96 @@ export default function CheckoutPage() {
                       const label = known ? t(`checkout.identifier.${id}.label`) : id;
                       const placeholder = known ? t(`checkout.identifier.${id}.placeholder`) : '';
                       const wasAutofilled = autofilledFields.has(id) && identifierValues[id]?.trim();
+                      const isDiscord = id === 'discord_id';
+                      const discordValue = identifierValues[id] || '';
+                      const discordValid = /^\d{17,20}$/.test(discordValue.trim());
+                      const handlePaste = async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          const cleaned = text.trim().replace(/[^0-9]/g, '');
+                          if (!/^\d{17,20}$/.test(cleaned)) {
+                            addToast(t('checkout.discord_help.invalid'), 'warning');
+                            return;
+                          }
+                          setIdentifierValues((prev) => ({ ...prev, [id]: cleaned }));
+                          if (autofilledFields.has(id)) {
+                            setAutofilledFields((prev) => {
+                              const next = new Set(prev);
+                              next.delete(id);
+                              return next;
+                            });
+                          }
+                          addToast(t('checkout.discord_help.pasted'), 'success');
+                        } catch {
+                          addToast(t('checkout.discord_help.paste_failed'), 'error');
+                        }
+                      };
                       return (
                         <div key={id}>
-                          <label className="block text-sm font-medium text-volcanic-300 mb-2">
-                            {label}
-                            <span className="text-red-400 ml-1">*</span>
-                            {wasAutofilled && (
-                              <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ark-600/15 text-ark-400 border border-ark-600/30">
-                                <ShieldCheck className="w-3 h-3" />
-                                Tip4Serv
-                              </span>
+                          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                            <label className="block text-sm font-medium text-volcanic-300">
+                              {label}
+                              <span className="text-red-400 ml-1">*</span>
+                              {wasAutofilled && (
+                                <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ark-600/15 text-ark-400 border border-ark-600/30">
+                                  <ShieldCheck className="w-3 h-3" />
+                                  Tip4Serv
+                                </span>
+                              )}
+                              {isDiscord && discordValue && discordValid && (
+                                <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                  <Check className="w-3 h-3" />
+                                  OK
+                                </span>
+                              )}
+                            </label>
+                            {isDiscord && (
+                              <button
+                                type="button"
+                                onClick={() => setDiscordHelpOpen(true)}
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-ark-400 hover:text-ark-300 transition-colors"
+                              >
+                                <HelpCircle className="w-3.5 h-3.5" />
+                                {t('checkout.discord_help.button')}
+                              </button>
                             )}
-                          </label>
-                          <input
-                            type={id === 'email' ? 'email' : 'text'}
-                            placeholder={placeholder}
-                            value={identifierValues[id] || ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setIdentifierValues((prev) => ({ ...prev, [id]: value }));
-                              if (autofilledFields.has(id)) {
-                                setAutofilledFields((prev) => {
-                                  const next = new Set(prev);
-                                  next.delete(id);
-                                  return next;
-                                });
-                              }
-                            }}
-                            className="input-field"
-                          />
+                          </div>
+                          <div className="relative">
+                            <input
+                              type={id === 'email' ? 'email' : 'text'}
+                              inputMode={isDiscord ? 'numeric' : undefined}
+                              placeholder={placeholder}
+                              value={discordValue}
+                              onChange={(e) => {
+                                const value = isDiscord ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
+                                setIdentifierValues((prev) => ({ ...prev, [id]: value }));
+                                if (autofilledFields.has(id)) {
+                                  setAutofilledFields((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(id);
+                                    return next;
+                                  });
+                                }
+                              }}
+                              className={`input-field ${isDiscord ? 'pr-32' : ''}`}
+                            />
+                            {isDiscord && (
+                              <button
+                                type="button"
+                                onClick={handlePaste}
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-volcanic-200 bg-volcanic-800/80 hover:bg-volcanic-700 border border-volcanic-700/60 transition-colors"
+                              >
+                                <ClipboardPaste className="w-3.5 h-3.5" />
+                                {t('checkout.discord_help.paste')}
+                              </button>
+                            )}
+                          </div>
+                          {isDiscord && discordValue && !discordValid && (
+                            <p className="mt-1.5 text-xs text-amber-400 flex items-center gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5" />
+                              {t('checkout.discord_help.invalid')}
+                            </p>
+                          )}
                         </div>
                       );
                     })}
@@ -607,6 +669,56 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {discordHelpOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+          onClick={() => setDiscordHelpOpen(false)}
+        >
+          <div
+            className="glass-card max-w-lg w-full p-6 sm:p-7 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setDiscordHelpOpen(false)}
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-volcanic-400 hover:text-heading hover:bg-volcanic-800/60 transition-colors"
+              aria-label={t('checkout.discord_help.close')}
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-ark-600/15 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-5 h-5 text-ark-500" />
+              </div>
+              <h3 className="text-lg font-bold text-heading">{t('checkout.discord_help.title')}</h3>
+            </div>
+            <p className="text-sm text-volcanic-300 mb-4">{t('checkout.discord_help.intro')}</p>
+            <ol className="space-y-3 text-sm text-volcanic-300">
+              {[1, 2, 3, 4].map((n) => (
+                <li key={n} className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-ark-600 text-white text-xs font-bold flex items-center justify-center">
+                    {n}
+                  </span>
+                  <span className="leading-relaxed">{t(`checkout.discord_help.step${n}`)}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-4 p-3 rounded-lg bg-volcanic-800/40 border border-volcanic-700/40 text-xs text-volcanic-400 leading-relaxed">
+              {t('checkout.discord_help.tip')}
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDiscordHelpOpen(false)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-ark-600 hover:bg-ark-500 text-white text-sm font-semibold transition-colors"
+              >
+                {t('checkout.discord_help.close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
