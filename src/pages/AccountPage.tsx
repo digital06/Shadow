@@ -463,7 +463,9 @@ function SubscriptionsPanel({
         const periodLabel = s.period_num && s.duration_periodicity
           ? `${s.period_num} ${periodicityKey(s.duration_periodicity)}`
           : periodicityKey(s.duration_periodicity || '');
-        const canCancel = !s.unsubscribed && !s.onetime && (s.status || '').toLowerCase() === 'active';
+        const status = (s.status || '').toLowerCase();
+        const terminalStatuses = ['canceled', 'cancelled', 'expired', 'failed', 'refunded', 'unsubscribed'];
+        const canCancel = !s.unsubscribed && !s.onetime && !terminalStatuses.includes(status);
         return (
           <article key={s.id} className="glass-card p-5 flex flex-col">
             <div className="flex items-start justify-between gap-3 mb-3">
