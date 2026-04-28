@@ -53,14 +53,17 @@ function formatAmount(amount: number, currency: string): string {
 
 function StatusPill({ status }: { status: string }) {
   const s = (status || '').toLowerCase();
-  const isOk = ['paid', 'complete', 'completed', 'succeeded', 'success', 'active'].includes(s);
+  const isPaid = s === 'paid';
+  const isProcessed = ['processed', 'complete', 'completed', 'succeeded', 'success', 'active'].includes(s);
   const isPending = ['pending', 'processing', 'created', 'open'].includes(s);
-  const cls = isOk
-    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-    : isPending
-      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-      : 'bg-rose-500/10 text-rose-400 border-rose-500/30';
-  const Icon = isOk ? CheckCircle2 : isPending ? Clock : XCircle;
+  const cls = isPaid
+    ? 'bg-sky-500/10 text-sky-400 border-sky-500/30'
+    : isProcessed
+      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+      : isPending
+        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+        : 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+  const Icon = isPaid || isProcessed ? CheckCircle2 : isPending ? Clock : XCircle;
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-semibold uppercase tracking-wider ${cls}`}>
       <Icon className="w-3 h-3" />
