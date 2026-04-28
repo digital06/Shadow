@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, Hop as Home, Package, ExternalLink, LogIn, Link2, Globe, Check, User as UserIcon, CreditCard, Repeat, LogOut } from 'lucide-react';
+import { Menu, X, ShoppingCart, Gamepad2, Sun, Moon, ChevronDown, LayoutGrid, House as Home, Package, ExternalLink, LogIn, Link2, Globe, Check, User as UserIcon, CreditCard, Repeat, LogOut } from 'lucide-react';
 import { useCart } from '../../lib/cart';
 import { useStore } from '../../lib/store';
 import { useTheme } from '../../lib/theme';
