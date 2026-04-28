@@ -5,6 +5,7 @@ import { useCart } from '../lib/cart';
 import { useStore } from '../lib/store';
 import { useToast } from '../lib/toast';
 import { useT } from '../lib/i18n';
+import { usePageTitle } from '../lib/usePageTitle';
 import { computeExtrasPrice } from '../lib/pricing';
 import { getCheckoutIdentifiers, createCheckout } from '../lib/api';
 import { useTip4ServAuth } from '../lib/tip4servAuth';
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
   const { store } = useStore();
   const { addToast } = useToast();
   const t = useT();
+  usePageTitle(t('checkout.title'));
   const { user: tipUser } = useTip4ServAuth();
   const [requiredIdentifiers, setRequiredIdentifiers] = useState<string[]>([]);
   const [identifierValues, setIdentifierValues] = useState<Record<string, string>>({});

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader as Loader2, CircleAlert as AlertCircle, CircleCheck as CheckCircle2 } from 'lucide-react';
+import { usePageTitle } from '../lib/usePageTitle';
 
 const ORIGIN_KEY = 'discord_oauth_opener_origin';
 
 export default function DiscordOAuthCallbackPage() {
+  usePageTitle('Discord');
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [message, setMessage] = useState<string>('');
   const handledRef = useRef(false);

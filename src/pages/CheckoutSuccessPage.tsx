@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { CircleCheck as CheckCircle, Server, ShoppingBag, Clock, Shield } from 'lucide-react';
 import { useT } from '../lib/i18n';
 import { useCart } from '../lib/cart';
+import { usePageTitle } from '../lib/usePageTitle';
 
 export default function CheckoutSuccessPage() {
   const t = useT();
   const { clearCart } = useCart();
+  usePageTitle(t('checkout_success.title'));
 
   useEffect(() => {
     clearCart();

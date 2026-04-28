@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Circle as XCircle, ShoppingCart, RefreshCw, Circle as HelpCircle, ShieldCheck } from 'lucide-react';
 import { useT } from '../lib/i18n';
+import { usePageTitle } from '../lib/usePageTitle';
 
 export default function CheckoutCanceledPage() {
   const t = useT();
+  usePageTitle(t('checkout_canceled.title'));
   return (
     <div className="pt-32 pb-16 animate-fade-in">
       <div className="max-w-2xl mx-auto px-4">

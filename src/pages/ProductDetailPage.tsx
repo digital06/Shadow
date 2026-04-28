@@ -14,6 +14,8 @@ import { useT } from '../lib/i18n';
 import type { Product } from '../lib/types';
 import { getCustomFieldDefaults, translatePeriodicity } from '../lib/utils';
 import { computeExtrasPrice } from '../lib/pricing';
+import { useStore } from '../lib/store';
+import { usePageTitle } from '../lib/usePageTitle';
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -26,7 +28,10 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const { addToast } = useToast();
   const t = useT();
+  const { store } = useStore();
   const checkoutStatus = searchParams.get('checkout');
+
+  usePageTitle(product?.name || null);
 
   useEffect(() => {
     async function load() {
@@ -57,9 +62,8 @@ export default function ProductDetailPage() {
     if (!product) return;
     const image = product.image || product.gallery?.[0] || '';
     const description = product.small_description?.replace(/<[^>]*>/g, '').slice(0, 160) || '';
-    const title = `${product.name} - Boutique ARK France Ascended`;
-
-    document.title = title;
+    const storeName = store?.title || 'Boutique';
+    const title = `${product.name} | ${storeName}`;
 
     const ogUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-product?slug=${product.slug}&site=${encodeURIComponent(window.location.origin)}`;
 
@@ -86,11 +90,7 @@ export default function ProductDetailPage() {
       }
       tag.setAttribute('content', value);
     });
-
-    return () => {
-      document.title = 'Boutique ARK France Ascended - Livraison sur votre serveur ARK FRANCE';
-    };
-  }, [product]);
+  }, [product, store]);
 
   const extrasPrice = useMemo(() => {
     return computeExtrasPrice(product?.custom_fields, customFieldValues);

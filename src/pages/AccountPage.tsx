@@ -26,6 +26,7 @@ import {
 } from '../lib/tip4servAuth';
 import { useToast } from '../lib/toast';
 import { useT } from '../lib/i18n';
+import { usePageTitle } from '../lib/usePageTitle';
 
 type TabKey = 'profile' | 'payments' | 'subscriptions';
 
@@ -79,6 +80,7 @@ export default function AccountPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { token, user, ready, loading, connect, logout } = useTip4ServAuth();
   const { addToast } = useToast();
+  usePageTitle(t('account.title_default'));
   const initialTab = ((): TabKey => {
     const tp = searchParams.get('tab');
     return tp === 'payments' || tp === 'subscriptions' ? tp : 'profile';

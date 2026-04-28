@@ -8,6 +8,7 @@ import { fallbackProducts, fallbackCategories } from '../data/fallback';
 import { getCategoryIcon } from '../lib/categoryIcons';
 import type { Product, Category } from '../lib/types';
 import { useT } from '../lib/i18n';
+import { usePageTitle } from '../lib/usePageTitle';
 
 type SortOption = 'name' | 'price-asc' | 'price-desc' | 'newest' | 'popular';
 
@@ -83,6 +84,8 @@ export default function ProductsPage() {
     ? categories.find((c) => c.slug === activeSlug)
     : null;
   const activeCategoryName = activeCategory?.name || null;
+
+  usePageTitle(activeCategoryName || t('products.page.title_all'));
 
   const { filtered, totalPages, paginatedProducts } = useMemo(() => {
     const results = filteredProducts.filter((p) => {
