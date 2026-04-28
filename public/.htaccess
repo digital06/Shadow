@@ -6,6 +6,11 @@
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
 
+  # Route social media crawlers to the SSR meta-tag edge function for the homepage
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|WhatsApp|Pinterest|redditbot|Applebot|Googlebot|bingbot) [NC]
+  RewriteCond %{REQUEST_URI} ^/?$
+  RewriteRule ^ https://lpntxqncvgbexesxjprd.supabase.co/functions/v1/og-store?path=%{REQUEST_URI} [P,L]
+
   # Otherwise, redirect all requests to index.html
   RewriteRule ^ index.html [QSA,L]
 </IfModule>
