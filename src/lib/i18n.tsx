@@ -306,6 +306,13 @@ const fr: Dict = {
   'checkout.discord_help.paste_failed': 'Impossible de lire le presse-papiers. Collez manuellement.',
   'checkout.discord_help.invalid': 'L\'identifiant Discord doit contenir uniquement des chiffres (17 à 20).',
   'checkout.discord_help.close': 'Fermer',
+  'checkout.discord_help.connect': 'Se connecter avec Discord',
+  'checkout.discord_help.connecting': 'Connexion...',
+  'checkout.discord_help.connected': 'Identifiant Discord récupéré ({username}) !',
+  'checkout.discord_help.connect_failed': 'Connexion à Discord impossible : {error}',
+  'checkout.discord_help.popup_blocked': 'Le navigateur a bloqué la fenêtre Discord. Autorisez les pop-ups et réessayez.',
+  'checkout.discord_help.not_configured': 'La connexion Discord n\'est pas configurée sur ce site.',
+  'checkout.discord_help.or_manual': 'Ou récupérez-le manuellement :',
 };
 
 const en: Dict = {
@@ -610,6 +617,13 @@ const en: Dict = {
   'checkout.discord_help.paste_failed': 'Could not read the clipboard. Please paste manually.',
   'checkout.discord_help.invalid': 'A Discord ID must contain only digits (17 to 20).',
   'checkout.discord_help.close': 'Close',
+  'checkout.discord_help.connect': 'Sign in with Discord',
+  'checkout.discord_help.connecting': 'Connecting...',
+  'checkout.discord_help.connected': 'Discord ID retrieved ({username})!',
+  'checkout.discord_help.connect_failed': 'Could not connect to Discord: {error}',
+  'checkout.discord_help.popup_blocked': 'The browser blocked the Discord window. Allow pop-ups and try again.',
+  'checkout.discord_help.not_configured': 'Discord login is not configured on this site.',
+  'checkout.discord_help.or_manual': 'Or fetch it manually:',
 };
 
 const dictionaries: Record<Language, Dict> = { fr, en };
