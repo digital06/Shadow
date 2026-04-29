@@ -48,7 +48,7 @@ export default function Hero() {
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="/background.png"
+          src="/hytalehero.jpg"
           alt=""
           className="w-full h-full object-cover scale-105"
         />
