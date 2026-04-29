@@ -48,8 +48,8 @@ export default function Hero() {
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="/hytalehero.jpg"
-          alt="Hytale"
+          src="/background.png"
+          alt=""
           className="w-full h-full object-cover scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-volcanic-950 via-volcanic-950/90 to-volcanic-950/50" />
