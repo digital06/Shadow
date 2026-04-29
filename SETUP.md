@@ -1,4 +1,4 @@
-# Guide de configuration (revente du site)
+# Guide de configuration
 
 Vous avez **deux modes** au choix :
 
@@ -57,4 +57,4 @@ Pour les ajustements visuels :
 
 - Palette : `tailwind.config.js`
 - Favicon / OG image : `public/`
-- Image hero : `public/hytalehero.jpg`
+- Image hero : `public/background.jpg`
