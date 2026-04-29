@@ -130,6 +130,16 @@ Bot redirections can be handled through:
 
 This makes it possible to generate dynamic link previews without rebuilding the frontend every time a product or store setting changes.
 
+## Configuration Guide
+
+### Using `.env` — Recommended
+
+1. Open the `.env` file at the root of the project.
+2. Add your Tip4Serv API key:
+
+```env
+TIP4SERV_API_KEY=your_tip4serv_api_key_here
+
 ## Deployment
 
 The project is designed to be deployed easily on modern hosting environments compatible with SPA applications.
