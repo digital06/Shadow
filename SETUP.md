@@ -57,4 +57,4 @@ Pour les ajustements visuels :
 
 - Palette : `tailwind.config.js`
 - Favicon / OG image : `public/`
-- Image hero : `public/background.jpg`
+- Image hero : `public/background.png`
