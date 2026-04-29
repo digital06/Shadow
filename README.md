@@ -1,48 +1,55 @@
-# Thème Shadow pour Tip4Serv
+# Tip4Serv Store Theme
 
-Thème boutique moderne, premium et responsive conçu pour les serveurs de jeux utilisant Tip4Serv.  
-Il permet de créer une boutique en ligne complète pour vendre des ranks, kits, packs, objets in-game ou services liés à un serveur de jeu, avec une expérience utilisateur soignée et immersive.
+A modern, premium, and responsive store theme designed for game servers using Tip4Serv.  
+It allows you to create a complete online store for selling ranks, kits, packs, in-game items, or server-related services with a polished and immersive user experience.
 
 ## Description
 
-Ce projet propose une interface boutique avancée pensée pour les communautés gaming souhaitant disposer d’une vitrine professionnelle, rapide et agréable à utiliser.
+This project provides an advanced store interface built for gaming communities that want a professional, fast, and user-friendly storefront.
 
-Le thème inclut un design moderne avec mode clair/sombre, prise en charge multilingue, animations fluides, micro-interactions, hero visuel plein écran, sections de mise en avant, produits récents, catégories avec icônes et fiches produits détaillées.
+The theme includes a modern design with light/dark mode, multilingual support, smooth animations, micro-interactions, a fullscreen visual hero section, featured products, latest products, icon-based categories, and detailed product pages.
 
-Les fiches produits peuvent intégrer des champs personnalisés comme le nom du joueur, l’UUID, le serveur concerné ou toute autre information nécessaire à la livraison du produit.
+Product pages can include custom fields such as player name, UUID, target server, or any other information required for product delivery.
 
-Le tunnel d’achat est complet avec panier latéral, cross-sell, validation de commande, page de succès et page d’annulation.  
-Côté client, le thème propose également un espace compte avec historique des commandes, wishlist, liaison Discord via OAuth et bandeau promotionnel avec compte à rebours.
+The purchase flow is complete, with a dynamic side cart drawer, cross-sell suggestions, checkout validation, success page, and cancellation page.
 
-## Fonctionnalités principales
+On the customer side, the theme also provides an account area with order history, wishlist, Discord OAuth account linking, and a promotional banner with a discount countdown.
 
-- Boutique en ligne moderne pour serveurs de jeux
-- Compatible avec les produits Tip4Serv : ranks, kits, packs, objets in-game
-- Interface responsive et optimisée mobile
-- Mode clair / sombre
-- Support multilingue
-- Hero visuel plein écran
-- Sections produits mis en avant et dernières nouveautés
-- Catégories avec icônes
-- Fiches produits détaillées
-- Champs personnalisés par produit :
-  - Nom de joueur
+## Main Features
+
+- Modern online store for game servers
+- Compatible with Tip4Serv products:
+  - Ranks
+  - Kits
+  - Packs
+  - In-game items
+  - Server services
+- Responsive and mobile-friendly interface
+- Light and dark mode
+- Multilingual support
+- Fullscreen visual hero section
+- Featured and latest product sections
+- Icon-based categories
+- Detailed product pages
+- Custom product fields:
+  - Player name
   - UUID
-  - Serveur
-  - Informations complémentaires
-- Panier latéral dynamique
-- Suggestions cross-sell dans le panier
-- Tunnel de checkout complet
-- Pages de succès et d’annulation de paiement
-- Espace compte client
-- Historique des commandes
-- Liaison Discord via OAuth
-- Bandeau promotionnel avec compte à rebours
-- Animations fluides et micro-interactions
-- SEO optimisé avec balises meta dynamiques
-- Aperçus de liens compatibles Discord, Twitter/X, Facebook et Google
+  - Server
+  - Additional information
+- Dynamic side cart drawer
+- Cross-sell suggestions in the cart
+- Complete checkout flow
+- Payment success and cancellation pages
+- Customer account area
+- Order history
+- Wishlist
+- Discord OAuth account linking
+- Promotional banner with countdown timer
+- Smooth animations and micro-interactions
+- SEO-optimized dynamic meta tags
+- Link previews compatible with Discord, Twitter/X, Facebook, and Google
 
-## Stack technique
+## Technical Stack
 
 ### Frontend
 
@@ -52,7 +59,7 @@ Côté client, le thème propose également un espace compte avec historique des
 - React Router 7
 - Tailwind CSS 3
 - Lucide React
-- Contexts React pour la gestion globale de l’état :
+- React Contexts for global state management:
   - `ThemeProvider`
   - `LanguageProvider`
   - `CartProvider`
@@ -62,74 +69,74 @@ Côté client, le thème propose également un espace compte avec historique des
 
 ### Backend / Data
 
-Le projet utilise Bolt Database avec PostgreSQL pour stocker et gérer certaines données avancées :
+The project uses Bolt Database with PostgreSQL to manage advanced store data:
 
 - Wishlist
-- Statistiques produits
-- Serveurs RCON
-- Sécurité via RLS stricte
+- Product statistics
+- RCON servers
+- Strict Row Level Security policies
 
 ### Edge Functions
 
-Le thème s’appuie sur plusieurs Edge Functions Deno :
+The theme relies on several Deno Edge Functions:
 
 - `tip4serv-proxy`  
-  Proxy sécurisé vers l’API Tip4Serv pour récupérer les informations boutique, le catalogue et gérer le checkout.
+  Secure proxy to the Tip4Serv API for store information, catalog data, and checkout handling.
 
 - `og-store`  
-  Génération SSR des balises Open Graph de la boutique pour les bots.
+  Server-side generation of Open Graph metadata for the store.
 
 - `og-product`  
-  Génération SSR des balises Open Graph des produits pour les bots.
+  Server-side generation of Open Graph metadata for product pages.
 
 - `discord-oauth`  
-  Callback OAuth pour la liaison Discord.
+  Discord OAuth callback for account linking.
 
 - `rcon-players`  
-  Récupération de la liste des joueurs en ligne via RCON.
+  Retrieves the list of online players through RCON.
 
-## Intégrations
+## Integrations
 
 - Tip4Serv
-  - Catalogue
-  - Paiement
-  - Gestion boutique
+  - Catalog
+  - Payments
+  - Store management
 
 - Discord OAuth
-  - Connexion et liaison du compte Discord
+  - Discord login and account linking
 
 - Stripe
-  - Paiements via Tip4Serv
+  - Payments handled through Tip4Serv
 
-## SEO et aperçu des liens
+## SEO and Link Previews
 
-Le thème intègre une gestion avancée des meta tags :
+The theme includes advanced meta tag management:
 
-- Injection des meta tags au build via plugin Vite
-- Rafraîchissement côté client
-- Génération SSR des meta Open Graph via Edge Functions
-- Redirection des bots vers des fonctions dédiées pour obtenir des aperçus toujours à jour
-- Compatibilité avec :
+- Meta tags injected at build time through a Vite plugin
+- Client-side meta tag refresh
+- Server-side Open Graph metadata generation through Edge Functions
+- Bot redirection to dedicated functions for always up-to-date link previews
+- Compatible with:
   - Discord
   - Twitter/X
   - Facebook
   - Google
-  - Bots d’indexation
+  - Search engine bots
 
-Les redirections peuvent être gérées via :
+Bot redirections can be handled through:
 
-- `.htaccess` pour Apache
-- `_redirects` au format Netlify-style
+- `.htaccess` for Apache
+- `_redirects` in Netlify-style format
 
-Cela permet d’avoir des aperçus de liens dynamiques sans devoir rebuild le frontend à chaque modification de produit ou de boutique.
+This makes it possible to generate dynamic link previews without rebuilding the frontend every time a product or store setting changes.
 
-## Déploiement
+## Deployment
 
-Le projet est prévu pour être déployé facilement sur une infrastructure moderne compatible avec les applications SPA.
+The project is designed to be deployed easily on modern hosting environments compatible with SPA applications.
 
-Le frontend est généré avec Vite, tandis que les données dynamiques passent par les Edge Functions et l’API Tip4Serv.
+The frontend is built with Vite, while dynamic data is handled through Edge Functions and the Tip4Serv API.
 
-### Commandes principales
+### Main Commands
 
 ```bash
 npm install
