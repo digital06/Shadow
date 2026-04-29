@@ -1,4 +1,4 @@
-# Thème boutique Tip4Serv
+# Thème Shadow pour Tip4Serv
 
 Thème boutique moderne, premium et responsive conçu pour les serveurs de jeux utilisant Tip4Serv.  
 Il permet de créer une boutique en ligne complète pour vendre des ranks, kits, packs, objets in-game ou services liés à un serveur de jeu, avec une expérience utilisateur soignée et immersive.
