@@ -36,7 +36,6 @@ Côté client, le thème propose également un espace compte avec historique des
 - Pages de succès et d’annulation de paiement
 - Espace compte client
 - Historique des commandes
-- Wishlist
 - Liaison Discord via OAuth
 - Bandeau promotionnel avec compte à rebours
 - Animations fluides et micro-interactions
