@@ -15,6 +15,7 @@ import {
   Mail,
   CalendarDays,
   Ban,
+  RefreshCw,
 } from 'lucide-react';
 import {
   useTip4ServAuth,
@@ -104,25 +105,56 @@ export default function AccountPage() {
   const [subsLoading, setSubsLoading] = useState(false);
   const [unsubBusy, setUnsubBusy] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!token || tab !== 'payments' || payments !== null) return;
+  const loadPayments = useCallback(async () => {
+    if (!token) return;
     setPaymentsLoading(true);
     setPaymentsErr(null);
-    fetchUserPayments(token)
-      .then((r) => setPayments(r.payments || []))
-      .catch((e: Error) => setPaymentsErr(e.message))
-      .finally(() => setPaymentsLoading(false));
-  }, [token, tab, payments]);
+    try {
+      const r = await fetchUserPayments(token);
+      setPayments(r.payments || []);
+    } catch (e) {
+      setPaymentsErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setPaymentsLoading(false);
+    }
+  }, [token]);
 
-  useEffect(() => {
-    if (!token || tab !== 'subscriptions' || subs !== null) return;
+  const loadSubs = useCallback(async () => {
+    if (!token) return;
     setSubsLoading(true);
     setSubsErr(null);
-    fetchUserSubscriptions(token)
-      .then((r) => setSubs(r.subscriptions || []))
-      .catch((e: Error) => setSubsErr(e.message))
-      .finally(() => setSubsLoading(false));
-  }, [token, tab, subs]);
+    try {
+      const r = await fetchUserSubscriptions(token);
+      setSubs(r.subscriptions || []);
+    } catch (e) {
+      setSubsErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSubsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    if (tab === 'payments') loadPayments();
+    if (tab === 'subscriptions') loadSubs();
+  }, [token, tab, loadPayments, loadSubs]);
+
+  useEffect(() => {
+    if (!token) return;
+    const onFocus = () => {
+      if (tab === 'payments') loadPayments();
+      else if (tab === 'subscriptions') loadSubs();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') onFocus();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [token, tab, loadPayments, loadSubs]);
 
   const handleUnsubscribe = useCallback(
     async (subscriptionId: number) => {
@@ -294,6 +326,7 @@ export default function AccountPage() {
             loading={paymentsLoading}
             error={paymentsErr}
             payments={payments}
+            onRefresh={loadPayments}
           />
         )}
 
@@ -304,6 +337,7 @@ export default function AccountPage() {
             subs={subs}
             unsubBusy={unsubBusy}
             onUnsubscribe={handleUnsubscribe}
+            onRefresh={loadSubs}
           />
         )}
       </div>
@@ -347,30 +381,56 @@ function LoadingPanel({ label }: { label: string }) {
   );
 }
 
+function RefreshButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  const t = useT();
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-volcanic-300 hover:text-heading bg-volcanic-800/40 hover:bg-volcanic-800/70 border border-volcanic-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+      {t('account.refresh')}
+    </button>
+  );
+}
+
 function PaymentsPanel({
   loading,
   error,
   payments,
+  onRefresh,
 }: {
   loading: boolean;
   error: string | null;
   payments: Tip4ServPayment[] | null;
+  onRefresh: () => void;
 }) {
   const t = useT();
-  if (loading) return <LoadingPanel label={t('account.payments.loading')} />;
-  if (error) return <ErrorState message={error} />;
+  const header = (
+    <div className="flex justify-end mb-3">
+      <RefreshButton onClick={onRefresh} loading={loading} />
+    </div>
+  );
+  if (loading && !payments) return <LoadingPanel label={t('account.payments.loading')} />;
+  if (error) return <><>{header}</><ErrorState message={error} /></>;
   if (!payments || payments.length === 0) {
     return (
-      <EmptyState
-        icon={CreditCard}
-        title={t('account.payments.empty.title')}
-        description={t('account.payments.empty.description')}
-      />
+      <>
+        {header}
+        <EmptyState
+          icon={CreditCard}
+          title={t('account.payments.empty.title')}
+          description={t('account.payments.empty.description')}
+        />
+      </>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div>
+      {header}
+      <div className="space-y-3">
       {payments.map((p) => (
         <article key={p.id} className="glass-card p-5 hover:border-ark-600/30 transition-colors">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -414,6 +474,7 @@ function PaymentsPanel({
           </div>
         </article>
       ))}
+      </div>
     </div>
   );
 }
@@ -424,23 +485,33 @@ function SubscriptionsPanel({
   subs,
   unsubBusy,
   onUnsubscribe,
+  onRefresh,
 }: {
   loading: boolean;
   error: string | null;
   subs: Tip4ServSubscription[] | null;
   unsubBusy: number | null;
   onUnsubscribe: (id: number) => void;
+  onRefresh: () => void;
 }) {
   const t = useT();
-  if (loading) return <LoadingPanel label={t('account.subs.loading')} />;
-  if (error) return <ErrorState message={error} />;
+  const header = (
+    <div className="flex justify-end mb-3">
+      <RefreshButton onClick={onRefresh} loading={loading} />
+    </div>
+  );
+  if (loading && !subs) return <LoadingPanel label={t('account.subs.loading')} />;
+  if (error) return <><>{header}</><ErrorState message={error} /></>;
   if (!subs || subs.length === 0) {
     return (
-      <EmptyState
-        icon={Repeat}
-        title={t('account.subs.empty.title')}
-        description={t('account.subs.empty.description')}
-      />
+      <>
+        {header}
+        <EmptyState
+          icon={Repeat}
+          title={t('account.subs.empty.title')}
+          description={t('account.subs.empty.description')}
+        />
+      </>
     );
   }
 
@@ -460,7 +531,9 @@ function SubscriptionsPanel({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      {header}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {subs.map((s) => {
         const periodLabel = s.period_num && s.duration_periodicity
           ? `${s.period_num} ${periodicityKey(s.duration_periodicity)}`
@@ -520,6 +593,7 @@ function SubscriptionsPanel({
           </article>
         );
       })}
+      </div>
     </div>
   );
 }
