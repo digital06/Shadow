@@ -248,10 +248,18 @@ export default function CartDrawer() {
                   })}
                 </div>
               )}
+
+              {items.length > 0 && (
+                <div className="sm:hidden">
+                  <CrossSellSection cartItems={items} onClose={closeCart} />
+                </div>
+              )}
             </div>
 
             {items.length > 0 && (
-              <CrossSellSection cartItems={items} onClose={closeCart} />
+              <div className="hidden sm:block">
+                <CrossSellSection cartItems={items} onClose={closeCart} />
+              </div>
             )}
 
             {items.length > 0 && (
