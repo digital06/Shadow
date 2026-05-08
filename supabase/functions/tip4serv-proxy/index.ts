@@ -4,7 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Content-Type, Authorization, X-Client-Info, Apikey, X-Tip4Serv-Key",
 };
 
 const TIP4SERV_BASE = "https://api.tip4serv.com/v1";
@@ -70,7 +70,9 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const apiKey = Deno.env.get("TIP4SERV_API_KEY");
+    const apiKey =
+      req.headers.get("X-Tip4Serv-Key") ||
+      Deno.env.get("TIP4SERV_API_KEY");
     if (!apiKey) {
       return errorResponse(500, "TIP4SERV_API_KEY not configured");
     }
