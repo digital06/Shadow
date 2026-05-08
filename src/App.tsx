@@ -17,6 +17,7 @@ import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 import CheckoutCanceledPage from './pages/CheckoutCanceledPage';
 import AccountPage from './pages/AccountPage';
 import DiscordOAuthCallbackPage from './pages/DiscordOAuthCallbackPage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
                       <Route path="/checkout/canceled" element={<CheckoutCanceledPage />} />
                       <Route path="/account" element={<AccountPage />} />
                       <Route path="/auth/discord/callback" element={<DiscordOAuthCallbackPage />} />
+                      <Route path="/admin" element={<AdminPage />} />
                     </Routes>
                   </main>
                   <Footer />

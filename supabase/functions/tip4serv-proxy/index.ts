@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,28 @@ const corsHeaders = {
 };
 
 const TIP4SERV_BASE = "https://api.tip4serv.com/v1";
+
+async function loadApiKey(): Promise<string | null> {
+  const envKey = Deno.env.get("TIP4SERV_API_KEY");
+  if (envKey) return envKey;
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) return null;
+
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data } = await admin
+    .from("app_settings")
+    .select("value")
+    .eq("key", "tip4serv_api_key")
+    .maybeSingle();
+
+  const value = (data?.value || "").trim();
+  return value ? value : null;
+}
 
 function errorResponse(status: number, message: string) {
   return new Response(JSON.stringify({ error: message }), {
@@ -70,9 +93,12 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const apiKey = Deno.env.get("TIP4SERV_API_KEY");
+    const apiKey = await loadApiKey();
     if (!apiKey) {
-      return errorResponse(500, "TIP4SERV_API_KEY not configured");
+      return errorResponse(
+        500,
+        "Tip4Serv API key not configured. Claim ownership and set it from the /admin page."
+      );
     }
 
     const url = new URL(req.url);
