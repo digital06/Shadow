@@ -96,8 +96,5 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       exclude: ['lucide-react'],
     },
-    define: {
-      'import.meta.env.TIP4SERV_API_KEY': JSON.stringify(env.TIP4SERV_API_KEY || ''),
-    },
   };
 });

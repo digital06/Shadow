@@ -10,11 +10,8 @@ import { decodeProductData, decodeHtmlEntities } from './utils';
 
 const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tip4serv-proxy`;
 
-const localTip4ServKey = import.meta.env.TIP4SERV_API_KEY;
-
-const headers: Record<string, string> = {
+const headers = {
   'Content-Type': 'application/json',
-  ...(localTip4ServKey ? { 'X-Tip4Serv-Key': localTip4ServKey } : {}),
 };
 
 async function fetchApi<T>(params: Record<string, string>): Promise<T> {
