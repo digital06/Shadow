@@ -139,11 +139,9 @@ This makes it possible to generate dynamic link previews without rebuilding the 
 
 ### Using `.env` — Recommended
 
-1. Open the `.env` file at the root of the project.
-2. Add your Tip4Serv API key:
-
-```env
-TIP4SERV_API_KEY=your_tip4serv_api_key_here
+1. When you first launch the site, go to /admin.
+2. Since no one has claimed the site yet, a “Claim this site” form will appear. Enter an email address and a password—this creates a unique owner account.
+3. Once logged in, paste the Tip4Serv key into the designated field and save. It takes effect immediately.
 
 ## Deployment
 
