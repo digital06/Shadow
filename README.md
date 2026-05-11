@@ -153,6 +153,4 @@ The frontend is built with Vite, while dynamic data is handled through Edge Func
 
 ```bash
 npm install
-npm run dev
 npm run build
-npm run preview
