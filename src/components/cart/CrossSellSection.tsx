@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Star, Sparkles, Loader as Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAllProducts, getProductBySlug } from '../../lib/api';
-import { fallbackProducts } from '../../data/fallback';
 import { useCart, type CartItem } from '../../lib/cart';
 import { useToast } from '../../lib/toast';
 import type { Product } from '../../lib/types';
@@ -26,9 +25,9 @@ export default function CrossSellSection({ cartItems, onClose }: Props) {
     async function load() {
       try {
         const products = await getAllProducts();
-        if (!cancelled) setAllProducts(products.length > 0 ? products : fallbackProducts);
+        if (!cancelled) setAllProducts(products);
       } catch {
-        if (!cancelled) setAllProducts(fallbackProducts);
+        if (!cancelled) setAllProducts([]);
       } finally {
         if (!cancelled) setLoading(false);
       }

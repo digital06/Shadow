@@ -5,14 +5,13 @@ import LatestProducts from '../components/home/LatestProducts';
 import CategorySection from '../components/home/CategorySection';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { getAllProducts, getCategories } from '../lib/api';
-import { fallbackProducts, fallbackCategories } from '../data/fallback';
 import type { Product, Category } from '../lib/types';
 import { usePageTitle } from '../lib/usePageTitle';
 
 export default function HomePage() {
   usePageTitle();
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
-  const [categories, setCategories] = useState<Category[]>(fallbackCategories);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,10 +21,11 @@ export default function HomePage() {
           getAllProducts(),
           getCategories(),
         ]);
-        if (products.length > 0) setProducts(products);
-        if (catRes.categories?.length > 0) setCategories(catRes.categories);
+        setProducts(products);
+        setCategories(catRes.categories ?? []);
       } catch {
-        // fallback data already set
+        setProducts([]);
+        setCategories([]);
       } finally {
         setLoading(false);
       }

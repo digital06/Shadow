@@ -7,7 +7,6 @@ import DiscountCountdown from '../components/ui/DiscountCountdown';
 import CustomFieldsForm from '../components/products/CustomFieldsForm';
 import RelatedProducts from '../components/products/RelatedProducts';
 import { getProductBySlug } from '../lib/api';
-import { fallbackProducts } from '../data/fallback';
 import { useCart } from '../lib/cart';
 import { useToast } from '../lib/toast';
 import { useT } from '../lib/i18n';
@@ -40,8 +39,7 @@ export default function ProductDetailPage() {
         const data = await getProductBySlug(slug);
         setProduct(data);
       } catch {
-        const fallback = fallbackProducts.find((p) => p.slug === slug);
-        if (fallback) setProduct(fallback);
+        setProduct(null);
       } finally {
         setLoading(false);
       }

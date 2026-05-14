@@ -4,7 +4,6 @@ import { Search, X, ArrowUpDown, LayoutGrid, Rows3 } from 'lucide-react';
 import ProductGrid from '../components/products/ProductGrid';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { getAllProducts, getCategories } from '../lib/api';
-import { fallbackProducts, fallbackCategories } from '../data/fallback';
 import { getCategoryIcon } from '../lib/categoryIcons';
 import type { Product, Category } from '../lib/types';
 import { useT } from '../lib/i18n';
@@ -17,9 +16,8 @@ export default function ProductsPage() {
   const activeSlug = searchParams.get('category');
   const t = useT();
 
-  const [allProducts, setAllProducts] = useState<Product[]>(fallbackProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(fallbackProducts);
-  const [categories, setCategories] = useState<Category[]>(fallbackCategories);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('name');
@@ -30,9 +28,9 @@ export default function ProductsPage() {
     async function loadCategories() {
       try {
         const catRes = await getCategories();
-        if (catRes.categories?.length > 0) setCategories(catRes.categories);
+        setCategories(catRes.categories ?? []);
       } catch {
-        // fallback
+        setCategories([]);
       }
     }
     loadCategories();
@@ -52,25 +50,9 @@ export default function ProductsPage() {
       setLoading(true);
       try {
         const products = await getAllProducts(activeCategoryId);
-        if (!cancelled && products.length > 0) {
-          if (activeCategoryId === undefined) setAllProducts(products);
-          setFilteredProducts(products);
-        } else if (!cancelled) {
-          if (activeCategoryId === undefined) {
-            setFilteredProducts(fallbackProducts);
-          } else {
-            setFilteredProducts([]);
-          }
-        }
+        if (!cancelled) setFilteredProducts(products);
       } catch {
-        if (!cancelled) {
-          if (activeCategoryId === undefined) {
-            setFilteredProducts(fallbackProducts);
-          } else {
-            const catId = activeCategoryId;
-            setFilteredProducts(allProducts.filter((p) => p.category?.id === catId));
-          }
-        }
+        if (!cancelled) setFilteredProducts([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
